@@ -10,6 +10,7 @@
     h2 { color: #1DB954; margin-top: 0; font-size: 20px; text-align: center; }
     .form-group { margin-bottom: 12px; }
     label { font-weight: 600; display: block; margin-bottom: 4px; font-size: 14px; color: #333; }
+    .required { color: red; }
     input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
     button { width: 100%; padding: 12px; background: #06C755; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
     button:disabled { background: #ccc; }
@@ -19,16 +20,20 @@
   <div class="card">
     <h2>🎫 登記搶票行程</h2>
     <form id="ticketForm">
-      <div class="form-group"><label>姓名</label><input type="text" id="name" placeholder="例如：張小明"></div>
-      <div class="form-group"><label>售票日期 *</label><input type="date" id="ticketDate" required></div>
-      <div class="form-group"><label>售票時間 *</label><input type="time" id="ticketTime" required></div>
-      <div class="form-group"><label>售票連結</label><input type="url" id="ticketLink" placeholder="https://..."></div>
-      <div class="form-group"><label>訂購張數</label><input type="number" id="ticketCount" placeholder="2"></div>
-      <div class="form-group"><label>平台帳號</label><input type="text" id="account"></div>
-      <div class="form-group"><label>平台密碼</label><input type="password" id="password"></div>
-      <div class="form-group"><label>演出日期</label><input type="date" id="eventDate"></div>
-      <div class="form-group"><label>票價區域</label><input type="text" id="ticketArea" placeholder="例如：A區 4800"></div>
-      <div class="form-group"><label>優先購票資訊</label><input type="text" id="priorityCode" placeholder="信用卡前6碼/會員碼"></div>
+      <!-- 必填欄位 -->
+      <div class="form-group"><label>姓名 <span class="required">*</span></label><input type="text" id="name" placeholder="例如：張小明" required></div>
+      <div class="form-group"><label>售票日期 <span class="required">*</span></label><input type="date" id="ticketDate" required></div>
+      <div class="form-group"><label>售票時間 <span class="required">*</span></label><input type="time" id="ticketTime" required></div>
+      <div class="form-group"><label>售票連結 <span class="required">*</span></label><input type="url" id="ticketLink" placeholder="https://..." required></div>
+      <div class="form-group"><label>訂購張數 <span class="required">*</span></label><input type="number" id="ticketCount" placeholder="2" min="1" required></div>
+      <div class="form-group"><label>平台帳號 <span class="required">*</span></label><input type="text" id="account" placeholder="拓元/KKTIX 帳號" required></div>
+      <div class="form-group"><label>平台密碼 <span class="required">*</span></label><input type="password" id="password" placeholder="登入密碼" required></div>
+      
+      <!-- 選填欄位 -->
+      <div class="form-group"><label>演出日期 (選填)</label><input type="date" id="eventDate"></div>
+      <div class="form-group"><label>票價區域 (選填)</label><input type="text" id="ticketArea" placeholder="例如：A區 4800"></div>
+      <div class="form-group"><label>優先購票 (選填)</label><input type="text" id="priorityCode" placeholder="信用卡前N碼、會員代碼..."></div>
+
       <button type="button" id="submitBtn" onclick="submitData()">送出並至 LINE 確認</button>
     </form>
   </div>
@@ -43,16 +48,21 @@
     };
 
     async function submitData() {
-      const btn = document.getElementById('submitBtn');
-      const name = document.getElementById('name').value;
+      const name = document.getElementById('name').value.trim();
       const ticketDate = document.getElementById('ticketDate').value;
       const ticketTime = document.getElementById('ticketTime').value;
+      const ticketLink = document.getElementById('ticketLink').value.trim();
+      const ticketCount = document.getElementById('ticketCount').value;
+      const account = document.getElementById('account').value.trim();
+      const password = document.getElementById('password').value.trim();
 
-      if (!ticketDate || !ticketTime) {
-        alert("請務必填寫「售票日期」與「售票時間」！");
+      // 檢查必填欄位
+      if (!name || !ticketDate || !ticketTime || !ticketLink || !ticketCount || !account || !password) {
+        alert("請確保所有【必填欄位】均已正確填寫！");
         return;
       }
 
+      const btn = document.getElementById('submitBtn');
       btn.disabled = true;
       btn.innerText = "資料處理中...";
 
@@ -72,13 +82,13 @@
         name: name,
         ticketDate: ticketDate,
         ticketTime: ticketTime,
-        ticketLink: document.getElementById('ticketLink').value,
-        ticketCount: document.getElementById('ticketCount').value,
-        account: document.getElementById('account').value,
-        password: document.getElementById('password').value,
+        ticketLink: ticketLink,
+        ticketCount: ticketCount,
+        account: account,
+        password: password,
         eventDate: document.getElementById('eventDate').value,
-        ticketArea: document.getElementById('ticketArea').value,
-        priorityCode: document.getElementById('priorityCode').value
+        ticketArea: document.getElementById('ticketArea').value.trim(),
+        priorityCode: document.getElementById('priorityCode').value.trim()
       };
 
       try {
