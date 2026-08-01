@@ -35,10 +35,10 @@
 
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
-    // 1. 請替換為你的 GAS 部署 Web App URL
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/你的_GAS_DEPLOYMENT_ID/exec";
+    // 📍 已自動帶入你的 GAS 部署網址
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwbjjKVDfgjqGNmlbK30tfe-7ybMTYNyJ6820IDMM-CSgjIIY4yx8FckBpjzF1sH7Ac/exec";
     
-    // 2. 你的 LIFF ID
+    // 📍 已自動帶入你的 LIFF ID
     const LIFF_ID = "2010930705-qUp1Ao2b";
 
     window.onload = function() {
@@ -81,7 +81,7 @@
 
         alert("✅ 已成功新增至 Google 日曆！");
         if (liff.isInClient()) {
-          liff.closeWindow(); // 在 LINE 內部開啟時自動關閉視窗
+          liff.closeWindow(); // 在 LINE 內開啟時自動關閉表單
         }
       } catch (err) {
         alert("設定失敗：" + err.message);
