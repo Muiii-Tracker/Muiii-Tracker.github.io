@@ -29,24 +29,22 @@
       <div class="form-group"><label>演出日期</label><input type="date" id="eventDate"></div>
       <div class="form-group"><label>票價區域</label><input type="text" id="ticketArea" placeholder="例如：A區 4800"></div>
       <div class="form-group"><label>優先購票資訊</label><input type="text" id="priorityCode" placeholder="信用卡前6碼/會員碼"></div>
-      <button type="button" id="submitBtn" onclick="submitData()">送出並設定 Google 日曆</button>
+      <button type="button" id="submitBtn" onclick="submitData()">送出並至 LINE 確認</button>
     </form>
   </div>
 
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
-    // 📍 已自動帶入你的 GAS 部署網址
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwbjjKVDfgjqGNmlbK30tfe-7ybMTYNyJ6820IDMM-CSgjIIY4yx8FckBpjzF1sH7Ac/exec";
-    
-    // 📍 已自動帶入你的 LIFF ID
     const LIFF_ID = "2010930705-qUp1Ao2b";
 
     window.onload = function() {
-      liff.init({ liffId: LIFF_ID }).catch(err => console.error(err));
+      liff.init({ liffId: LIFF_ID }).catch(err => console.error("LIFF 初始化失敗：", err));
     };
 
     async function submitData() {
       const btn = document.getElementById('submitBtn');
+      const name = document.getElementById('name').value;
       const ticketDate = document.getElementById('ticketDate').value;
       const ticketTime = document.getElementById('ticketTime').value;
 
@@ -58,8 +56,20 @@
       btn.disabled = true;
       btn.innerText = "資料處理中...";
 
+      let userId = "";
+      try {
+        if (liff.isLoggedIn()) {
+          const profile = await liff.getProfile();
+          userId = profile.userId;
+        }
+      } catch (e) {
+        console.warn("無法取得 Profile", e);
+      }
+
       const payload = {
-        name: document.getElementById('name').value,
+        action: "submit_form",
+        userId: userId,
+        name: name,
         ticketDate: ticketDate,
         ticketTime: ticketTime,
         ticketLink: document.getElementById('ticketLink').value,
@@ -79,12 +89,13 @@
           body: JSON.stringify(payload)
         });
 
-        alert("✅ 已成功新增至 Google 日曆！");
         if (liff.isInClient()) {
-          liff.closeWindow(); // 在 LINE 內開啟時自動關閉表單
+          liff.closeWindow(); // 直接關閉表單，回聊天室確認
+        } else {
+          alert("請至 LINE 聊天室查看確認訊息！");
         }
       } catch (err) {
-        alert("設定失敗：" + err.message);
+        alert("送出失敗：" + err.message);
         btn.disabled = false;
         btn.innerText = "重新送出";
       }
