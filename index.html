@@ -1,138 +1,252 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>搶票資訊登記</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; background-color: #f4f6f8; margin: 0; }
-    .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); max-width: 500px; margin: auto; }
-    h2 { color: #1DB954; margin-top: 0; font-size: 20px; text-align: center; }
-    .form-group { margin-bottom: 12px; }
-    label { font-weight: 600; display: block; margin-bottom: 4px; font-size: 14px; color: #333; }
-    .required { color: red; }
-    input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
-    button { width: 100%; padding: 12px; background: #06C755; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-    button:disabled { background: #ccc; cursor: not-allowed; }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>搶票資訊登記</title>
+  <style>
+    /* 全局基礎重設 */
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 20px 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    /* 主要卡片容器 */
+    .card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 16px;
+      padding: 28px 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      margin: auto;
+    }
+
+    h2 {
+      color: #1DB954;
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 22px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    /* 區塊分組標題 */
+    .section-divider {
+      font-size: 13px;
+      font-weight: 700;
+      color: #06C755;
+      margin: 20px 0 12px 0;
+      padding-bottom: 4px;
+      border-bottom: 2px solid #e8f7ed;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      color: #333333;
+    }
+
+    .required {
+      color: red;
+      margin-left: 2px;
+    }
+
+    /* 統一所有輸入框樣式 */
+    input[type="text"],
+    input[type="date"],
+    input[type="time"],
+    input[type="url"],
+    input[type="number"] {
+      width: 100%;
+      height: 44px;
+      padding: 10px 14px;
+      border: 1.5px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-size: 15px;
+      background-color: #fafafa;
+      outline: none;
+      transition: all 0.2s ease-in-out;
+      -webkit-appearance: none;
+    }
+
+    /* 輸入框聚焦 (Focus) 效果 */
+    input:focus {
+      background-color: #ffffff;
+      border-color: #06C755;
+      box-shadow: 0 0 0 3px rgba(6, 199, 85, 0.15);
+    }
+
+    input::placeholder {
+      color: #aaaaaa;
+      font-size: 14px;
+    }
+
+    /* 綠色質感大按鈕 */
+    button {
+      width: 100%;
+      height: 48px;
+      padding: 12px;
+      background: #06C755;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 20px;
+      box-shadow: 0 4px 12px rgba(6, 199, 85, 0.25);
+      transition: all 0.2s ease;
+    }
+
+    button:hover {
+      background: #05b34c;
+      box-shadow: 0 6px 16px rgba(6, 199, 85, 0.35);
+    }
+
+    button:disabled {
+      background: #ccc;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+  </style>
 </head>
 <body>
-  <div class="card">
-    <h2>🎫 搶票資訊登記</h2>
-    <form id="ticketForm">
-      <!-- 【必填欄位】 -->
-      <div class="form-group"><label>姓名 <span class="required">*</span></label><input type="text" id="name" placeholder="例如：張小明" required></div>
-      <div class="form-group"><label>售票日期 <span class="required">*</span></label><input type="date" id="ticketDate" required></div>
-      <div class="form-group"><label>售票時間 <span class="required">*</span></label><input type="time" id="ticketTime" required></div>
-      <div class="form-group"><label>售票連結 <span class="required">*</span></label><input type="url" id="ticketLink" placeholder="https://..." required></div>
-      <div class="form-group"><label>訂購張數 <span class="required">*</span></label><input type="number" id="ticketCount" placeholder="2" min="1" required></div>
-      <div class="form-group"><label>平台帳號 <span class="required">*</span></label><input type="text" id="account" placeholder="電子郵件、身分證、電話...等" required></div>
-      <div class="form-group"><label>平台密碼 <span class="required">*</span></label><input type="text" id="password" placeholder="登入密碼" required></div>
-      
-      <!-- 【選填欄位】 -->
-      <div class="form-group"><label>演出日期 (選填)</label><input type="date" id="eventDate"></div>
-      <div class="form-group"><label>票價區域 (選填)</label><input type="text" id="ticketArea" placeholder="例如：A區 4800"></div>
-      <div class="form-group"><label>優先購票 (選填)</label><input type="text" id="priorityCode" placeholder="信用卡前N碼、會員代碼..."></div>
+  <div class="card">
+    <h2>🎫 搶票資訊登記</h2>
+    <form id="ticketForm">
+      <!-- 【必填欄位】 -->
+      <div class="section-divider">📌 必填欄位</div>
+      <div class="form-group"><label>姓名 <span class="required">*</span></label><input type="text" id="name" placeholder="例如：張小明" required></div>
+      <div class="form-group"><label>售票日期 <span class="required">*</span></label><input type="date" id="ticketDate" required></div>
+      <div class="form-group"><label>售票時間 <span class="required">*</span></label><input type="time" id="ticketTime" required></div>
+      <div class="form-group"><label>售票連結 <span class="required">*</span></label><input type="url" id="ticketLink" placeholder="https://..." required></div>
+      <div class="form-group"><label>訂購張數 <span class="required">*</span></label><input type="number" id="ticketCount" placeholder="2" min="1" required></div>
+      <div class="form-group"><label>平台帳號 <span class="required">*</span></label><input type="text" id="account" placeholder="電子郵件、身分證、電話...等" required></div>
+      <div class="form-group"><label>平台密碼 <span class="required">*</span></label><input type="text" id="password" placeholder="登入密碼" required></div>
+      
+      <!-- 【選填欄位】 -->
+      <div class="section-divider">✏️ 選填欄位</div>
+      <div class="form-group"><label>演出日期 (選填)</label><input type="date" id="eventDate"></div>
+      <div class="form-group"><label>票價區域 (選填)</label><input type="text" id="ticketArea" placeholder="例如：A區 4800"></div>
+      <div class="form-group"><label>優先購票 (選填)</label><input type="text" id="priorityCode" placeholder="信用卡前N碼、會員代碼..."></div>
 
-      <!-- 提交按鈕 -->
-      <button type="button" id="submitBtn" onclick="submitData()">送出表單</button>
-    </form>
-  </div>
+      <!-- 提交按鈕 -->
+      <button type="button" id="submitBtn" onclick="submitData()">送出表單</button>
+    </form>
+  </div>
 
-  <!-- 引入 LINE LIFF SDK -->
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script>
-    // 定義 Apps Script 部署 URL 與 LIFF ID
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwbjjKVDfgjqGNmlbK30tfe-7ybMTYNyJ6820IDMM-CSgjIIY4yx8FckBpjzF1sH7Ac/exec";
-    const LIFF_ID = "2010930705-qUp1Ao2b";
+  <!-- 引入 LINE LIFF SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script>
+    // 定義 Apps Script 部署 URL 與 LIFF ID
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwbjjKVDfgjqGNmlbK30tfe-7ybMTYNyJ6820IDMM-CSgjIIY4yx8FckBpjzF1sH7Ac/exec";
+    const LIFF_ID = "2010930705-qUp1Ao2b";
 
-    // 頁面載入完成時初始化 LIFF SDK
-    window.onload = function() {
-      liff.init({ liffId: LIFF_ID }).catch(err => console.error("LIFF 初始化失敗：", err));
-    };
+    // 頁面載入完成時初始化 LIFF SDK
+    window.onload = function() {
+      liff.init({ liffId: LIFF_ID }).catch(err => console.error("LIFF 初始化失敗：", err));
+    };
 
-    // 表單送出處理解析函式
-    async function submitData() {
-      // 1. 取得表單欄位數值並進行修剪（Trim）
-      const name = document.getElementById('name').value.trim();
-      const ticketDate = document.getElementById('ticketDate').value;
-      const ticketTime = document.getElementById('ticketTime').value;
-      const ticketLink = document.getElementById('ticketLink').value.trim();
-      const ticketCount = document.getElementById('ticketCount').value;
-      const account = document.getElementById('account').value.trim();
-      const password = document.getElementById('password').value.trim();
+    // 表單送出處理解析函式
+    async function submitData() {
+      // 1. 取得表單欄位數值並進行修剪（Trim）
+      const name = document.getElementById('name').value.trim();
+      const ticketDate = document.getElementById('ticketDate').value;
+      const ticketTime = document.getElementById('ticketTime').value;
+      const ticketLink = document.getElementById('ticketLink').value.trim();
+      const ticketCount = document.getElementById('ticketCount').value;
+      const account = document.getElementById('account').value.trim();
+      const password = document.getElementById('password').value.trim();
 
-      // 2. 防護機制：檢查必填欄位是否皆已填寫
-      if (!name || !ticketDate || !ticketTime || !ticketLink || !ticketCount || !account || !password) {
-        alert("請確保所有【必填欄位】均已正確填寫！");
-        return;
-      }
+      // 2. 防護機制：檢查必填欄位是否皆已填寫
+      if (!name || !ticketDate || !ticketTime || !ticketLink || !ticketCount || !account || !password) {
+        alert("請確保所有【必填欄位】均已正確填寫！");
+        return;
+      }
 
-      // 3. 鎖定送出按鈕，避免使用者重複連擊送出
-      const btn = document.getElementById('submitBtn');
-      btn.disabled = true;
-      btn.innerText = "處理中...";
+      // 3. 鎖定送出按鈕，避免使用者重複連擊送出
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerText = "處理中...";
 
-      // 4. 透過 LIFF 取得使用者的 LINE User ID
-      let userId = "";
-      try {
-        if (liff.isLoggedIn()) {
-          const profile = await liff.getProfile();
-          userId = profile.userId;
-        }
-      } catch (e) {
-        console.warn("無法取得 LINE Profile ID", e);
-      }
+      // 4. 透過 LIFF 取得使用者的 LINE User ID
+      let userId = "";
+      try {
+        if (liff.isLoggedIn()) {
+          const profile = await liff.getProfile();
+          userId = profile.userId;
+        }
+      } catch (e) {
+        console.warn("無法取得 LINE Profile ID", e);
+      }
 
-      // 5. 處理選填欄位的預設顯示值
-      const eventDateVal = document.getElementById('eventDate').value || "未指定";
-      const ticketAreaVal = document.getElementById('ticketArea').value.trim() || "未指定";
-      const priorityCodeVal = document.getElementById('priorityCode').value.trim() || "無";
+      // 5. 處理選填欄位的預設顯示值
+      const eventDateVal = document.getElementById('eventDate').value || "未指定";
+      const ticketAreaVal = document.getElementById('ticketArea').value.trim() || "未指定";
+      const priorityCodeVal = document.getElementById('priorityCode').value.trim() || "無";
 
-      // 6. 打包將發送至 GAS 後端的 JSON Payload 內容
-      const payload = {
-        action: "submit_form",
-        userId: userId,
-        name: name,
-        ticketDate: ticketDate,
-        ticketTime: ticketTime,
-        ticketLink: ticketLink,
-        ticketCount: ticketCount,
-        account: account,
-        password: password,
-        eventDate: eventDateVal,
-        ticketArea: ticketAreaVal,
-        priorityCode: priorityCodeVal
-      };
+      // 6. 打包將發送至 GAS 後端的 JSON Payload 內容
+      const payload = {
+        action: "submit_form",
+        userId: userId,
+        name: name,
+        ticketDate: ticketDate,
+        ticketTime: ticketTime,
+        ticketLink: ticketLink,
+        ticketCount: ticketCount,
+        account: account,
+        password: password,
+        eventDate: eventDateVal,
+        ticketArea: ticketAreaVal,
+        priorityCode: priorityCodeVal
+      };
 
-      try {
-        // 步驟 A：將表單資料靜默發送至 GAS 後端暫存 (no-cors 避免跨網域阻擋)
-        await fetch(GAS_WEB_APP_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
+      try {
+        // 步驟 A：將表單資料靜默發送至 GAS 後端暫存 (no-cors 避免跨網域阻擋)
+        await fetch(GAS_WEB_APP_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
 
-        // 步驟 B：💡【0 額度核心】由使用者手機 App 端發出訊息「請核對登記資訊」
-        // 這會觸發 LINE Webhook 並帶給 GAS 一個免費的 Reply Token
-        if (liff.isInClient()) {
-          await liff.sendMessages([
-            {
-              type: "text",
-              text: "核對資料" // 👈 啟動後端發送左邊卡片的關鍵字
-            }
-          ]);
-          liff.closeWindow(); // 發送完成後自動關閉 LIFF 視窗
-        } else {
-          alert("已送出！請到 LINE 聊天室確認。");
-        }
-      } catch (err) {
-        alert("送出失敗：" + err.message);
-        btn.disabled = false;
-        btn.innerText = "重新送出";
-      }
-    }
-  </script>
+        // 步驟 B：💡【0 額度核心】由使用者手機 App 端發出訊息「請核對登記資訊」
+        // 這會觸發 LINE Webhook 並帶給 GAS 一個免費的 Reply Token
+        if (liff.isInClient()) {
+          await liff.sendMessages([
+            {
+              type: "text",
+              text: "核對資料" // 👈 啟動後端發送左邊卡片的關鍵字
+            }
+          ]);
+          liff.closeWindow(); // 發送完成後自動關閉 LIFF 視窗
+        } else {
+          alert("已送出！請到 LINE 聊天室確認。");
+        }
+      } catch (err) {
+        alert("送出失敗：" + err.message);
+        btn.disabled = false;
+        btn.innerText = "重新送出";
+      }
+    }
+  </script>
 </body>
 </html>
