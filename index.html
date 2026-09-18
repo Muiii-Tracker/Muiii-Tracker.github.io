@@ -8,16 +8,16 @@
     :root {
       --primary: #06C755;
       --primary-hover: #05b34c;
-      --primary-soft: #f0faf3;
-      --text-main: #191f28;
-      --text-sub: #4e5968;
-      --text-muted: #8b95a1;
-      --border-color: #e5e8eb;
-      --bg-color: #f4f6f8;
+      --primary-soft: #e8f7ed;
+      --text-main: #111827;
+      --text-sub: #4b5563;
+      --text-muted: #9ca3af;
+      --border-color: #e5e7eb;
+      --bg-color: #f3f4f6;
       --card-bg: #ffffff;
-      --danger: #e93d3d;
-      --danger-soft: #fef0f0;
-      --radius-lg: 18px;
+      --danger: #ef4444;
+      --danger-soft: #fee2e2;
+      --radius-lg: 20px;
       --radius-md: 12px;
     }
 
@@ -30,29 +30,42 @@
     body {
       background-color: var(--bg-color);
       margin: 0;
-      padding: 32px 16px 64px 16px;
+      padding: 24px 16px 48px 16px;
       display: flex;
       justify-content: center;
       min-height: 100vh;
       color: var(--text-main);
     }
 
-    /* 主卡片：自適應 PC 與手機端 */
+    /* 主卡片：精緻陰影與頂部裝飾光條 */
     .card {
       background: var(--card-bg);
       width: 100%;
-      max-width: 600px;
+      max-width: 520px;
       border-radius: var(--radius-lg);
       padding: 28px 24px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
-      border: 1px solid rgba(230, 233, 237, 0.8);
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.03);
+      border: 1px solid rgba(229, 231, 235, 0.8);
       height: fit-content;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, #06C755, #10b981);
     }
 
     /* 頂部標題 */
     .app-header {
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 22px;
+      margin-top: 4px;
     }
 
     .app-header h2 {
@@ -66,11 +79,11 @@
     /* 第一層：導覽切換 (iOS Segmented 質感) */
     .tabs {
       display: flex;
-      background: #eaedf0;
-      padding: 4px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      gap: 4px;
+      background: #f1f5f9;
+      padding: 5px;
+      border-radius: 14px;
+      margin-bottom: 22px;
+      gap: 6px;
     }
 
     .tab-btn {
@@ -81,9 +94,9 @@
       border: none;
       font-size: 14.5px;
       font-weight: 600;
-      color: var(--text-muted);
+      color: var(--text-sub);
       cursor: pointer;
-      border-radius: 9px;
+      border-radius: 10px;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -97,11 +110,12 @@
     /* 第二層：列表過濾標籤 */
     .filter-tabs {
       display: flex;
-      background: #f2f4f6;
-      border-radius: 10px;
-      padding: 3px;
-      gap: 4px;
-      margin-bottom: 20px;
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 4px;
+      gap: 6px;
+      margin-bottom: 18px;
+      border: 1px solid var(--border-color);
     }
 
     .filter-btn {
@@ -110,11 +124,11 @@
       text-align: center;
       border: none;
       background: transparent;
-      color: var(--text-muted);
+      color: var(--text-sub);
       cursor: pointer;
       font-size: 13.5px;
       font-weight: 600;
-      border-radius: 8px;
+      border-radius: 9px;
       transition: all 0.2s ease;
     }
 
@@ -122,7 +136,7 @@
       background: #ffffff;
       color: var(--primary);
       font-weight: 700;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
     }
 
     /* 區塊分割線 */
@@ -132,7 +146,7 @@
       color: var(--primary);
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin: 20px 0 12px 0;
+      margin: 22px 0 12px 0;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -146,7 +160,7 @@
     }
 
     .form-group {
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
 
     label {
@@ -165,13 +179,13 @@
     /* 輸入框 */
     input {
       width: 100%;
-      height: 44px;
+      height: 46px;
       padding: 10px 14px;
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
+      border: 1.5px solid var(--border-color);
+      border-radius: var(--radius-md);
       box-sizing: border-box;
       font-size: 15px;
-      background: #fbfcfd;
+      background: #fafafc;
       color: var(--text-main);
       outline: none;
       transition: all 0.2s ease;
@@ -179,24 +193,24 @@
     }
 
     input:hover {
-      border-color: #cbd3dc;
+      border-color: #cbd5e1;
     }
 
     input:focus {
       border-color: var(--primary);
       background: #ffffff;
-      box-shadow: 0 0 0 3px rgba(6, 199, 85, 0.12);
+      box-shadow: 0 0 0 4px rgba(6, 199, 85, 0.12);
     }
 
     input::placeholder {
-      color: #b0b8c1;
+      color: var(--text-muted);
       font-size: 14px;
     }
 
     /* 送出按鈕 */
     .primary-btn {
       width: 100%;
-      height: 48px;
+      height: 50px;
       background: var(--primary);
       color: white;
       border: none;
@@ -205,13 +219,14 @@
       font-weight: 700;
       cursor: pointer;
       margin-top: 24px;
-      box-shadow: 0 4px 12px rgba(6, 199, 85, 0.2);
+      box-shadow: 0 4px 14px rgba(6, 199, 85, 0.25);
       transition: all 0.2s ease;
     }
 
     .primary-btn:hover {
       background: var(--primary-hover);
       transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(6, 199, 85, 0.35);
     }
 
     .primary-btn:active {
@@ -219,7 +234,7 @@
     }
 
     .primary-btn:disabled {
-      background: #d1d6db;
+      background: #cbd5e1;
       box-shadow: none;
       cursor: not-allowed;
       transform: none;
@@ -227,21 +242,23 @@
 
     /* 列表行程卡片 */
     .item-card {
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
+      border: 1.5px solid var(--border-color);
+      border-radius: var(--radius-md);
       padding: 16px;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
       background: #ffffff;
       transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
 
     .item-card:hover {
-      border-color: #cbd3dc;
-      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
+      border-color: #cbd5e1;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
 
     .item-card.is-expired {
-      background: #fafbfb;
+      background: #fafafa;
+      border-color: #e2e8f0;
       opacity: 0.85;
     }
 
@@ -254,14 +271,14 @@
 
     .item-title {
       font-weight: 700;
-      font-size: 16.5px;
+      font-size: 17px;
       color: var(--text-main);
     }
 
     .item-badge {
       font-size: 12px;
-      padding: 3px 8px;
-      border-radius: 6px;
+      padding: 3px 10px;
+      border-radius: 20px;
       font-weight: 700;
     }
 
@@ -271,44 +288,48 @@
     }
 
     .badge-expired {
-      background: #eaedf0;
+      background: #f1f5f9;
       color: var(--text-muted);
     }
 
     .item-body {
-      font-size: 13.5px;
+      font-size: 14px;
       color: var(--text-sub);
-      line-height: 1.7;
+      line-height: 1.8;
     }
 
     .item-body a {
-      color: #3182f6;
+      color: #2563eb;
       text-decoration: none;
       font-weight: 600;
+    }
+
+    .item-body a:hover {
+      text-decoration: underline;
     }
 
     .item-timestamps {
       font-size: 11.5px;
       color: var(--text-muted);
-      margin-top: 10px;
+      margin-top: 12px;
       border-top: 1px dashed var(--border-color);
       padding-top: 8px;
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 3px;
     }
 
     .item-actions {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       margin-top: 14px;
     }
 
     .action-btn {
       flex: 1;
-      padding: 8px 0;
-      border-radius: 8px;
-      font-size: 13px;
+      padding: 9px 0;
+      border-radius: 9px;
+      font-size: 13.5px;
       font-weight: 600;
       border: none;
       cursor: pointer;
@@ -316,29 +337,30 @@
     }
 
     .edit-btn {
-      background: #f2f4f6;
+      background: #f1f5f9;
       color: var(--text-sub);
+      border: 1px solid #cbd5e1;
     }
 
     .edit-btn:hover {
-      background: #e5e8eb;
+      background: #e2e8f0;
     }
 
     .delete-btn {
       background: var(--danger-soft);
       color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.15);
     }
 
     .delete-btn:hover {
-      background: #fdd8d8;
+      background: #fecaca;
     }
 
-    /* 空狀態顯示 */
     .empty-msg {
       text-align: center;
       color: var(--text-muted);
       padding: 48px 0;
-      font-size: 14px;
+      font-size: 14.5px;
     }
   </style>
 </head>
@@ -382,7 +404,7 @@
         <button class="filter-btn active" id="btnActiveList" onclick="filterList('active')">進行中 (未過期)</button>
         <button class="filter-btn" id="btnExpiredList" onclick="filterList('expired')">歷史紀錄 (已過期)</button>
       </div>
-      <div id="loadingText" style="text-align:center; padding: 32px; color: var(--text-muted); font-size: 14px;">載入中...</div>
+      <div id="loadingText" style="text-align:center; padding: 36px; color: var(--text-muted); font-size: 14px;">載入中...</div>
       <div id="listContainer"></div>
     </div>
   </div>
