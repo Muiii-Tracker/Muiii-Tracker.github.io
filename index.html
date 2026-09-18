@@ -3,171 +3,134 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>搶票資訊登記</title>
+  <title>搶票資訊管理中心</title>
   <style>
-    /* 全局基礎重設 */
-    * {
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    }
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #f4f6f8; margin: 0; padding: 16px 12px; display: flex; justify-content: center; min-height: 100vh; }
+    .card { background: #ffffff; width: 100%; max-width: 500px; border-radius: 16px; padding: 24px 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); height: fit-content; }
+    h2 { color: #1DB954; margin: 0 0 16px 0; font-size: 20px; text-align: center; }
+    
+    /* 頁籤導覽 */
+    .tabs { display: flex; border-bottom: 2px solid #e1e4e8; margin-bottom: 18px; }
+    .tab-btn { flex: 1; padding: 10px; text-align: center; background: none; border: none; font-size: 15px; font-weight: 600; color: #666; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+    .tab-btn.active { color: #06C755; border-bottom-color: #06C755; }
 
-    body {
-      background-color: #f4f6f8;
-      margin: 0;
-      padding: 20px 12px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
+    /* 表單元件 */
+    .section-divider { font-size: 13px; font-weight: 700; color: #06C755; margin: 16px 0 10px 0; padding-bottom: 4px; border-bottom: 2px solid #e8f7ed; }
+    .form-group { margin-bottom: 12px; }
+    label { font-weight: 600; display: block; margin-bottom: 4px; font-size: 14px; color: #333; }
+    .required { color: red; }
+    input { width: 100%; height: 42px; padding: 8px 12px; border: 1.5px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 14px; background: #fafafa; outline: none; }
+    input:focus { border-color: #06C755; background: #fff; }
+    .primary-btn { width: 100%; height: 46px; background: #06C755; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 16px; }
+    .primary-btn:disabled { background: #ccc; cursor: not-allowed; }
 
-    /* 主要卡片容器 */
-    .card {
-      background: #ffffff;
-      width: 100%;
-      max-width: 480px;
-      border-radius: 16px;
-      padding: 28px 24px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-      margin: auto;
-    }
-
-    h2 {
-      color: #1DB954;
-      margin-top: 0;
-      margin-bottom: 20px;
-      font-size: 22px;
-      font-weight: 700;
-      text-align: center;
-    }
-
-    /* 區塊分組標題 */
-    .section-divider {
-      font-size: 13px;
-      font-weight: 700;
-      color: #06C755;
-      margin: 20px 0 12px 0;
-      padding-bottom: 4px;
-      border-bottom: 2px solid #e8f7ed;
-    }
-
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    label {
-      font-weight: 600;
-      display: block;
-      margin-bottom: 6px;
-      font-size: 14px;
-      color: #333333;
-    }
-
-    .required {
-      color: red;
-      margin-left: 2px;
-    }
-
-    /* 統一所有輸入框樣式 */
-    input[type="text"],
-    input[type="date"],
-    input[type="time"],
-    input[type="url"],
-    input[type="number"] {
-      width: 100%;
-      height: 44px;
-      padding: 10px 14px;
-      border: 1.5px solid #ccc;
-      border-radius: 8px;
-      box-sizing: border-box;
-      font-size: 15px;
-      background-color: #fafafa;
-      outline: none;
-      transition: all 0.2s ease-in-out;
-      -webkit-appearance: none;
-    }
-
-    /* 輸入框聚焦 (Focus) 效果 */
-    input:focus {
-      background-color: #ffffff;
-      border-color: #06C755;
-      box-shadow: 0 0 0 3px rgba(6, 199, 85, 0.15);
-    }
-
-    input::placeholder {
-      color: #aaaaaa;
-      font-size: 14px;
-    }
-
-    /* 綠色質感大按鈕 */
-    button {
-      width: 100%;
-      height: 48px;
-      padding: 12px;
-      background: #06C755;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 20px;
-      box-shadow: 0 4px 12px rgba(6, 199, 85, 0.25);
-      transition: all 0.2s ease;
-    }
-
-    button:hover {
-      background: #05b34c;
-      box-shadow: 0 6px 16px rgba(6, 199, 85, 0.35);
-    }
-
-    button:disabled {
-      background: #ccc;
-      box-shadow: none;
-      cursor: not-allowed;
-    }
+    /* 列表元件 */
+    .filter-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+    .filter-btn { flex: 1; padding: 6px 12px; font-size: 13px; border-radius: 20px; border: 1px solid #ddd; background: #fff; cursor: pointer; }
+    .filter-btn.active { background: #e8f7ed; border-color: #06C755; color: #06C755; font-weight: bold; }
+    .item-card { border: 1px solid #e1e4e8; border-radius: 12px; padding: 14px; margin-bottom: 12px; background: #fafafa; }
+    .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .item-title { font-weight: bold; font-size: 16px; color: #111; }
+    .item-badge { font-size: 12px; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
+    .badge-active { background: #e8f7ed; color: #06C755; }
+    .badge-expired { background: #eeeeee; color: #888888; }
+    .item-body { font-size: 13px; color: #555; line-height: 1.6; }
+    .item-timestamps { font-size: 11px; color: #999; margin-top: 8px; border-top: 1px dashed #e1e4e8; padding-top: 6px; }
+    .item-actions { display: flex; gap: 8px; margin-top: 10px; }
+    .action-btn { flex: 1; padding: 8px; border-radius: 6px; font-size: 13px; font-weight: bold; border: none; cursor: pointer; }
+    .edit-btn { background: #f0f2f5; color: #333; border: 1px solid #ccc; }
+    .delete-btn { background: #ffebeb; color: #d93025; }
+    .empty-msg { text-align: center; color: #999; padding: 30px 0; font-size: 14px; }
   </style>
 </head>
 <body>
   <div class="card">
-    <h2>🎫 搶票資訊登記</h2>
-    <form id="ticketForm">
-      <!-- 【必填欄位】 -->
-      <div class="section-divider">📌 必填欄位</div>
-      <div class="form-group"><label>姓名 <span class="required">*</span></label><input type="text" id="name" placeholder="例如：張小明" required></div>
-      <div class="form-group"><label>售票日期 <span class="required">*</span></label><input type="date" id="ticketDate" required></div>
-      <div class="form-group"><label>售票時間 <span class="required">*</span></label><input type="time" id="ticketTime" required></div>
-      <div class="form-group"><label>售票連結 <span class="required">*</span></label><input type="url" id="ticketLink" placeholder="https://..." required></div>
-      <div class="form-group"><label>訂購張數 <span class="required">*</span></label><input type="number" id="ticketCount" placeholder="2" min="1" required></div>
-      <div class="form-group"><label>平台帳號 <span class="required">*</span></label><input type="text" id="account" placeholder="電子郵件、身分證、電話...等" required></div>
-      <div class="form-group"><label>平台密碼 <span class="required">*</span></label><input type="text" id="password" placeholder="登入密碼" required></div>
-      
-      <!-- 【選填欄位】 -->
-      <div class="section-divider">✏️ 選填欄位</div>
-      <div class="form-group"><label>演出日期 (選填)</label><input type="date" id="eventDate"></div>
-      <div class="form-group"><label>票價區域 (選填)</label><input type="text" id="ticketArea" placeholder="例如：A區 4800"></div>
-      <div class="form-group"><label>優先購票 (選填)</label><input type="text" id="priorityCode" placeholder="信用卡前N碼、會員代碼..."></div>
+    <h2>🎫 搶票資訊管理系統</h2>
+    
+    <div class="tabs">
+      <button class="tab-btn active" id="tabRegister" onclick="switchView('register')">新增 / 編輯登記</button>
+      <button class="tab-btn" id="tabList" onclick="switchView('list')">行程清單</button>
+    </div>
 
-      <!-- 提交按鈕 -->
-      <button type="button" id="submitBtn" onclick="submitData()">送出表單</button>
-    </form>
+    <!-- 表單 View -->
+    <div id="viewRegister">
+      <form id="ticketForm">
+        <input type="hidden" id="editEventId" value="">
+        <div class="section-divider">📌 必填欄位</div>
+        <div class="form-group"><label>姓名 <span class="required">*</span></label><input type="text" id="name" placeholder="例如：張小明" required></div>
+        <div class="form-group"><label>售票日期 <span class="required">*</span></label><input type="date" id="ticketDate" required></div>
+        <div class="form-group"><label>售票時間 <span class="required">*</span></label><input type="time" id="ticketTime" required></div>
+        <div class="form-group"><label>售票連結 <span class="required">*</span></label><input type="url" id="ticketLink" placeholder="https://..." required></div>
+        <div class="form-group"><label>訂購張數 <span class="required">*</span></label><input type="number" id="ticketCount" placeholder="2" min="1" required></div>
+        <div class="form-group"><label>平台帳號 <span class="required">*</span></label><input type="text" id="account" placeholder="電子郵件、電話...等" required></div>
+        <div class="form-group"><label>平台密碼 <span class="required">*</span></label><input type="text" id="password" placeholder="登入密碼" required></div>
+
+        <div class="section-divider">✏️ 選填欄位</div>
+        <div class="form-group"><label>演出日期 (選填)</label><input type="date" id="eventDate"></div>
+        <div class="form-group"><label>票價區域 (選填)</label><input type="text" id="ticketArea" placeholder="例如：A區 4800"></div>
+        <div class="form-group"><label>優先購票 (選填)</label><input type="text" id="priorityCode" placeholder="信用卡前N碼、會員代碼..."></div>
+
+        <button type="button" id="submitBtn" class="primary-btn" onclick="submitData()">送出表單</button>
+      </form>
+    </div>
+
+    <!-- 列表 View -->
+    <div id="viewList" style="display: none;">
+      <div class="filter-tabs">
+        <button class="filter-btn active" id="btnActiveList" onclick="filterList('active')">進行中 (未過期)</button>
+        <button class="filter-btn" id="btnExpiredList" onclick="filterList('expired')">歷史紀錄 (已過期)</button>
+      </div>
+      <div id="loadingText" style="text-align:center; padding: 20px; color:#888;">載入中...</div>
+      <div id="listContainer"></div>
+    </div>
   </div>
 
-  <!-- 引入 LINE LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
-    // 定義 Apps Script 部署 URL 與 LIFF ID
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwbjjKVDfgjqGNmlbK30tfe-7ybMTYNyJ6820IDMM-CSgjIIY4yx8FckBpjzF1sH7Ac/exec";
     const LIFF_ID = "2010930705-qUp1Ao2b";
+    let allEvents = [];
+    let currentFilter = 'active';
 
-    // 頁面載入完成時初始化 LIFF SDK
-    window.onload = function() {
-      liff.init({ liffId: LIFF_ID }).catch(err => console.error("LIFF 初始化失敗：", err));
+    window.onload = async function() {
+      try {
+        await liff.init({ liffId: LIFF_ID });
+        // 檢查 URL query 是否帶入編輯參數
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("mode") === "list") {
+          switchView('list');
+        }
+      } catch (err) {
+        console.error("LIFF 初始化失敗：", err);
+      }
     };
 
-    // 表單送出處理解析函式
+    function switchView(view) {
+      if (view === 'register') {
+        document.getElementById('viewRegister').style.display = 'block';
+        document.getElementById('viewList').style.display = 'none';
+        document.getElementById('tabRegister').classList.add('active');
+        document.getElementById('tabList').classList.remove('active');
+      } else {
+        document.getElementById('viewRegister').style.display = 'none';
+        document.getElementById('viewList').style.display = 'block';
+        document.getElementById('tabRegister').classList.remove('active');
+        document.getElementById('tabList').classList.add('active');
+        fetchEventList();
+      }
+    }
+
+    async function getUserId() {
+      if (liff.isLoggedIn()) {
+        const p = await liff.getProfile();
+        return p.userId;
+      }
+      return "";
+    }
+
+    // 表單提交
     async function submitData() {
-      // 1. 取得表單欄位數值並進行修剪（Trim）
       const name = document.getElementById('name').value.trim();
       const ticketDate = document.getElementById('ticketDate').value;
       const ticketTime = document.getElementById('ticketTime').value;
@@ -176,37 +139,22 @@
       const account = document.getElementById('account').value.trim();
       const password = document.getElementById('password').value.trim();
 
-      // 2. 防護機制：檢查必填欄位是否皆已填寫
       if (!name || !ticketDate || !ticketTime || !ticketLink || !ticketCount || !account || !password) {
         alert("請確保所有【必填欄位】均已正確填寫！");
         return;
       }
 
-      // 3. 鎖定送出按鈕，避免使用者重複連擊送出
       const btn = document.getElementById('submitBtn');
       btn.disabled = true;
       btn.innerText = "處理中...";
 
-      // 4. 透過 LIFF 取得使用者的 LINE User ID
-      let userId = "";
-      try {
-        if (liff.isLoggedIn()) {
-          const profile = await liff.getProfile();
-          userId = profile.userId;
-        }
-      } catch (e) {
-        console.warn("無法取得 LINE Profile ID", e);
-      }
+      const userId = await getUserId();
+      const editEventId = document.getElementById('editEventId').value;
 
-      // 5. 處理選填欄位的預設顯示值
-      const eventDateVal = document.getElementById('eventDate').value || "未指定";
-      const ticketAreaVal = document.getElementById('ticketArea').value.trim() || "未指定";
-      const priorityCodeVal = document.getElementById('priorityCode').value.trim() || "無";
-
-      // 6. 打包將發送至 GAS 後端的 JSON Payload 內容
       const payload = {
         action: "submit_form",
         userId: userId,
+        editEventId: editEventId,
         name: name,
         ticketDate: ticketDate,
         ticketTime: ticketTime,
@@ -214,13 +162,12 @@
         ticketCount: ticketCount,
         account: account,
         password: password,
-        eventDate: eventDateVal,
-        ticketArea: ticketAreaVal,
-        priorityCode: priorityCodeVal
+        eventDate: document.getElementById('eventDate').value || "未指定",
+        ticketArea: document.getElementById('ticketArea').value.trim() || "未指定",
+        priorityCode: document.getElementById('priorityCode').value.trim() || "無"
       };
 
       try {
-        // 步驟 A：將表單資料靜默發送至 GAS 後端暫存 (no-cors 避免跨網域阻擋)
         await fetch(GAS_WEB_APP_URL, {
           method: "POST",
           mode: "no-cors",
@@ -228,23 +175,117 @@
           body: JSON.stringify(payload)
         });
 
-        // 步驟 B：💡【0 額度核心】由使用者手機 App 端發出訊息「請核對登記資訊」
-        // 這會觸發 LINE Webhook 並帶給 GAS 一個免費的 Reply Token
         if (liff.isInClient()) {
-          await liff.sendMessages([
-            {
-              type: "text",
-              text: "核對資料" // 👈 啟動後端發送左邊卡片的關鍵字
-            }
-          ]);
-          liff.closeWindow(); // 發送完成後自動關閉 LIFF 視窗
+          await liff.sendMessages([{ type: "text", text: "核對資料" }]);
+          liff.closeWindow();
         } else {
-          alert("已送出！請到 LINE 聊天室確認。");
+          alert("已送出！請回到 LINE 聊天室確認。");
+          btn.disabled = false;
+          btn.innerText = "送出表單";
         }
       } catch (err) {
         alert("送出失敗：" + err.message);
         btn.disabled = false;
         btn.innerText = "重新送出";
+      }
+    }
+
+    // 抓取行程列表
+    async function fetchEventList() {
+      const userId = await getUserId();
+      document.getElementById('loadingText').style.display = 'block';
+      document.getElementById('listContainer').innerHTML = '';
+
+      try {
+        const resp = await fetch(`${GAS_WEB_APP_URL}?action=get_events&userId=${userId}`);
+        allEvents = await resp.json();
+        document.getElementById('loadingText').style.display = 'none';
+        renderList();
+      } catch (e) {
+        document.getElementById('loadingText').innerText = "載入失敗，請稍後重試。";
+      }
+    }
+
+    function filterList(type) {
+      currentFilter = type;
+      document.getElementById('btnActiveList').classList.toggle('active', type === 'active');
+      document.getElementById('btnExpiredList').classList.toggle('active', type === 'expired');
+      renderList();
+    }
+
+    function renderList() {
+      const container = document.getElementById('listContainer');
+      container.innerHTML = '';
+      const now = new Date().getTime();
+
+      const filtered = allEvents.filter(ev => {
+        const evTime = new Date(`${ev.ticketDate}T${ev.ticketTime}:00`).getTime();
+        return currentFilter === 'active' ? evTime >= now : evTime < now;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="empty-msg">查無${currentFilter === 'active' ? '進行中' : '歷史'}行程</div>`;
+        return;
+      }
+
+      filtered.forEach(ev => {
+        const evTime = new Date(`${ev.ticketDate}T${ev.ticketTime}:00`).getTime();
+        const isExpired = evTime < now;
+        const item = document.createElement('div');
+        item.className = 'item-card';
+        item.innerHTML = `
+          <div class="item-header">
+            <span class="item-title">${ev.name}</span>
+            <span class="item-badge ${isExpired ? 'badge-expired' : 'badge-active'}">${isExpired ? '已過期' : '進行中'}</span>
+          </div>
+          <div class="item-body">
+            <div>⏰ 售票：${ev.ticketDate} ${ev.ticketTime}</div>
+            <div>🎫 張數：${ev.ticketCount}張 | 區域：${ev.ticketArea}</div>
+            <div>🔗 連結：<a href="${ev.ticketLink}" target="_blank">點此前往</a></div>
+          </div>
+          <div class="item-timestamps">
+            <div>📌 首次登記：${ev.createdAt || '無記錄'}</div>
+            ${ev.updatedAt ? `<div>✏️ 最後編輯：${ev.updatedAt}</div>` : ''}
+          </div>
+          <div class="item-actions">
+            <button class="action-btn edit-btn" onclick='onEditClick(${JSON.stringify(ev)})'>✏️ 編輯</button>
+            <button class="action-btn delete-btn" onclick="onDeleteClick('${ev.id}')">🗑️ 刪除</button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function onEditClick(ev) {
+      document.getElementById('editEventId').value = ev.id;
+      document.getElementById('name').value = ev.name;
+      document.getElementById('ticketDate').value = ev.ticketDate;
+      document.getElementById('ticketTime').value = ev.ticketTime;
+      document.getElementById('ticketLink').value = ev.ticketLink;
+      document.getElementById('ticketCount').value = ev.ticketCount;
+      document.getElementById('account').value = ev.account;
+      document.getElementById('password').value = ev.password;
+      document.getElementById('eventDate').value = (ev.eventDate !== '未指定') ? ev.eventDate : '';
+      document.getElementById('ticketArea').value = (ev.ticketArea !== '未指定') ? ev.ticketArea : '';
+      document.getElementById('priorityCode').value = (ev.priorityCode !== '無') ? ev.priorityCode : '';
+      
+      document.getElementById('submitBtn').innerText = "儲存修改";
+      switchView('register');
+    }
+
+    async function onDeleteClick(eventId) {
+      if (!confirm("確定要刪除這筆搶票登記嗎？日曆上的行程也會一併移除。")) return;
+      const userId = await getUserId();
+      try {
+        await fetch(GAS_WEB_APP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: `action=delete_event&userId=${userId}&eventId=${eventId}`
+        });
+        alert("刪除成功！");
+        fetchEventList();
+      } catch (e) {
+        alert("刪除失敗：" + e.message);
       }
     }
   </script>
