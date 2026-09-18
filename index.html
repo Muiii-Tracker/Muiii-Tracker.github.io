@@ -40,7 +40,7 @@
     .card {
       background: var(--card-bg);
       width: 100%;
-      max-width: 540px;
+      max-width: 520px;
       border-radius: var(--radius-lg);
       padding: 28px 24px;
       box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.03);
@@ -233,11 +233,11 @@
       transform: none;
     }
 
-    /* 詳細行程卡片樣式升級 */
+    /* 列表行程卡片樣式 */
     .item-card {
       border: 1.5px solid var(--border-color);
       border-radius: var(--radius-md);
-      padding: 18px;
+      padding: 20px;
       margin-bottom: 16px;
       background: #ffffff;
       transition: all 0.2s ease;
@@ -246,7 +246,7 @@
 
     .item-card:hover {
       border-color: #cbd5e1;
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
     }
 
     .item-card.is-expired {
@@ -259,14 +259,14 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
-      padding-bottom: 8px;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
       border-bottom: 1px solid #f1f5f9;
     }
 
     .item-title {
       font-weight: 800;
-      font-size: 17.5px;
+      font-size: 18px;
       color: var(--text-main);
     }
 
@@ -287,48 +287,40 @@
       color: var(--text-muted);
     }
 
-    /* 條列式詳細資訊清單 */
-    .detail-grid {
+    /* 上下結構詳細內容清單 */
+    .detail-list {
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      font-size: 13.5px;
-      color: var(--text-sub);
+      gap: 12px;
     }
 
-    .detail-row {
+    .detail-item {
       display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      padding: 4px 0;
+      flex-direction: column;
+      gap: 3px;
     }
 
     .detail-label {
-      color: var(--text-muted);
-      font-weight: 600;
-      min-width: 90px;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-sub);
       display: flex;
       align-items: center;
       gap: 4px;
     }
 
     .detail-val {
+      font-size: 14.5px;
+      font-weight: 500;
       color: var(--text-main);
-      font-weight: 600;
-      text-align: right;
+      padding-left: 2px;
       word-break: break-all;
-      flex: 1;
-      margin-left: 10px;
-    }
-
-    .detail-val.highlight {
-      color: #06C755;
-      font-weight: 700;
     }
 
     .detail-val a {
       color: #2563eb;
       text-decoration: none;
+      font-weight: 600;
     }
 
     .detail-val a:hover {
@@ -337,37 +329,38 @@
 
     .pwd-toggle-btn {
       background: #f1f5f9;
-      border: 1px solid #e2e8f0;
-      border-radius: 4px;
-      padding: 1px 6px;
-      font-size: 11px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 12px;
       cursor: pointer;
-      margin-left: 4px;
+      margin-left: 6px;
       color: #475569;
+      font-weight: 600;
     }
 
     .item-timestamps {
-      font-size: 11.5px;
+      font-size: 12px;
       color: var(--text-muted);
-      margin-top: 14px;
+      margin-top: 16px;
       border-top: 1px dashed var(--border-color);
-      padding-top: 10px;
+      padding-top: 12px;
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 4px;
     }
 
     .item-actions {
       display: flex;
       gap: 10px;
-      margin-top: 14px;
+      margin-top: 16px;
     }
 
     .action-btn {
       flex: 1;
-      padding: 9px 0;
+      padding: 10px 0;
       border-radius: 9px;
-      font-size: 13.5px;
+      font-size: 14px;
       font-weight: 600;
       border: none;
       cursor: pointer;
@@ -615,19 +608,6 @@
       renderList();
     }
 
-    // 密碼遮蔽/明文切換
-    function togglePwd(idx, realPwd) {
-      const el = document.getElementById('pwd-' + idx);
-      const btn = document.getElementById('btn-pwd-' + idx);
-      if (el.innerText === '••••••••') {
-        el.innerText = realPwd;
-        btn.innerText = '隱藏';
-      } else {
-        el.innerText = '••••••••';
-        btn.innerText = '顯示';
-      }
-    }
-
     function renderList() {
       const container = document.getElementById('listContainer');
       container.innerHTML = '';
@@ -655,46 +635,46 @@
             <span class="item-badge ${isExpired ? 'badge-expired' : 'badge-active'}">${isExpired ? '已過期' : '進行中'}</span>
           </div>
           
-          <div class="detail-grid">
-            <div class="detail-row">
+          <div class="detail-list">
+            <div class="detail-item">
               <span class="detail-label">⏰ 售票時間</span>
-              <span class="detail-val highlight">${ev.ticketDate} ${ev.ticketTime}</span>
+              <span class="detail-val">${ev.ticketDate} ${ev.ticketTime}</span>
             </div>
-            <div class="detail-row">
+            <div class="detail-item">
               <span class="detail-label">🎫 訂購張數</span>
               <span class="detail-val">${ev.ticketCount || 1} 張</span>
             </div>
-            <div class="detail-row">
+            <div class="detail-item">
               <span class="detail-label">💺 票價區域</span>
               <span class="detail-val">${ev.ticketArea || '未指定'}</span>
             </div>
-            <div class="detail-row">
+            <div class="detail-item">
               <span class="detail-label">📅 演出日期</span>
               <span class="detail-val">${ev.eventDate || '未指定'}</span>
             </div>
-            <div class="detail-row">
+            <div class="detail-item">
               <span class="detail-label">💳 優先購票</span>
               <span class="detail-val">${ev.priorityCode || '無'}</span>
             </div>
-            <div class="detail-row">
+            <div class="detail-item">
               <span class="detail-label">🔑 平台帳號</span>
               <span class="detail-val">${ev.account || '未填寫'}</span>
             </div>
-            <div class="detail-row">
+            <div class="detail-item">
               <span class="detail-label">🔒 平台密碼</span>
               <span class="detail-val">
                 <span id="pwd-${idx}">••••••••</span>
                 <button type="button" class="pwd-toggle-btn" id="btn-pwd-${idx}" onclick="togglePwd(${idx}, '${encodeURIComponent(ev.password || '')}')">顯示</button>
               </span>
             </div>
-            <div class="detail-row">
+            <div class="detail-item">
               <span class="detail-label">🔗 售票連結</span>
               <span class="detail-val"><a href="${ev.ticketLink}" target="_blank" rel="noopener">點此前往售票頁</a></span>
             </div>
           </div>
 
           <div class="item-timestamps">
-            <div>📌 首次登記：${ev.createdAt || '無記錄'}</div>
+            <div>📌 登記時間：${ev.createdAt || '無記錄'}</div>
             ${ev.updatedAt ? `<div>✏️ 最後編輯：${ev.updatedAt}</div>` : ''}
           </div>
 
@@ -707,7 +687,6 @@
       });
     }
 
-    // 支援解碼查看密碼
     window.togglePwd = function(idx, encodedPwd) {
       const el = document.getElementById('pwd-' + idx);
       const btn = document.getElementById('btn-pwd-' + idx);
