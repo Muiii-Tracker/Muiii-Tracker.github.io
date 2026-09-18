@@ -2,161 +2,251 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>搶票資訊登記</title>
   <style>
+    :root {
+      --primary: #06C755;
+      --primary-hover: #05b34c;
+      --primary-light: #e8f7ed;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --danger: #ef4444;
+      --danger-light: #fee2e2;
+    }
+
     * {
       box-sizing: border-box;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
-      background-color: #f4f6f8;
+      background: linear-gradient(180deg, #edf7f0 0%, #f8fafc 180px, #f1f5f9 100%);
       margin: 0;
-      padding: 16px 12px;
+      padding: 16px 12px 32px 12px;
       display: flex;
       justify-content: center;
       min-height: 100vh;
+      color: var(--text-main);
     }
 
+    /* 主要卡片容器 */
     .card {
-      background: #ffffff;
+      background: var(--card-bg);
       width: 100%;
       max-width: 480px;
-      border-radius: 16px;
+      border-radius: 20px;
       padding: 24px 20px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+      border: 1px solid rgba(226, 232, 240, 0.8);
       height: fit-content;
       margin: auto;
     }
 
-    h2 {
-      color: #1DB954;
-      margin: 0 0 16px 0;
-      font-size: 20px;
+    /* 頂部標題 */
+    .app-header {
       text-align: center;
+      margin-bottom: 20px;
     }
 
-    /* 頁籤導覽 */
+    .app-header h2 {
+      color: #0f172a;
+      margin: 0;
+      font-size: 21px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .app-header p {
+      margin: 4px 0 0 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* 分頁選單 (Segmented Tabs) */
     .tabs {
       display: flex;
-      border-bottom: 2px solid #e1e4e8;
-      margin-bottom: 18px;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      gap: 4px;
     }
 
     .tab-btn {
       flex: 1;
-      padding: 10px;
+      padding: 9px 0;
       text-align: center;
-      background: none;
+      background: transparent;
       border: none;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 600;
-      color: #666;
+      color: var(--text-muted);
       cursor: pointer;
-      border-bottom: 2px solid transparent;
-      margin-bottom: -2px;
+      border-radius: 9px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .tab-btn.active {
-      color: #06C755;
-      border-bottom-color: #06C755;
+      background: #ffffff;
+      color: #0f172a;
+      font-weight: 700;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
     }
 
-    /* 區塊標題 */
+    /* 區塊分割線與標題 */
     .section-divider {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
-      color: #06C755;
-      margin: 16px 0 10px 0;
-      padding-bottom: 4px;
-      border-bottom: 2px solid #e8f7ed;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 18px 0 10px 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .section-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: #e2e8f0;
     }
 
     .form-group {
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
 
     label {
       font-weight: 600;
       display: block;
-      margin-bottom: 4px;
-      font-size: 14px;
-      color: #333;
+      margin-bottom: 6px;
+      font-size: 13.5px;
+      color: #334155;
     }
 
     .required {
-      color: red;
+      color: #ef4444;
+      font-weight: bold;
     }
 
+    /* 輸入框美化 */
     input {
       width: 100%;
-      height: 42px;
-      padding: 8px 12px;
-      border: 1.5px solid #ccc;
-      border-radius: 8px;
+      height: 44px;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border-color);
+      border-radius: 10px;
       box-sizing: border-box;
-      font-size: 14px;
-      background: #fafafa;
+      font-size: 14.5px;
+      background: #f8fafc;
+      color: #0f172a;
       outline: none;
-      transition: all 0.2s;
+      transition: all 0.2s ease;
+      -webkit-appearance: none;
+    }
+
+    input:hover {
+      border-color: #cbd5e1;
     }
 
     input:focus {
-      border-color: #06C755;
-      background: #fff;
-      box-shadow: 0 0 0 3px rgba(6, 199, 85, 0.15);
+      border-color: var(--primary);
+      background: #ffffff;
+      box-shadow: 0 0 0 3.5px rgba(6, 199, 85, 0.15);
     }
 
+    input::placeholder {
+      color: #94a3b8;
+      font-size: 13.5px;
+    }
+
+    /* 提交按鈕 */
     .primary-btn {
       width: 100%;
-      height: 46px;
-      background: #06C755;
+      height: 48px;
+      background: var(--primary);
       color: white;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       font-size: 16px;
-      font-weight: bold;
+      font-weight: 700;
       cursor: pointer;
-      margin-top: 16px;
-      box-shadow: 0 4px 12px rgba(6, 199, 85, 0.25);
+      margin-top: 20px;
+      box-shadow: 0 4px 14px rgba(6, 199, 85, 0.28);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .primary-btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(6, 199, 85, 0.35);
+    }
+
+    .primary-btn:active {
+      transform: translateY(0);
     }
 
     .primary-btn:disabled {
-      background: #ccc;
+      background: #cbd5e1;
       box-shadow: none;
       cursor: not-allowed;
+      transform: none;
     }
 
-    /* 列表頁樣式 */
+    /* 列表頁過濾按鈕 */
     .filter-tabs {
       display: flex;
       gap: 8px;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
 
     .filter-btn {
       flex: 1;
-      padding: 6px 12px;
+      padding: 7px 14px;
       font-size: 13px;
       border-radius: 20px;
-      border: 1px solid #ddd;
-      background: #fff;
+      border: 1px solid var(--border-color);
+      background: #ffffff;
+      color: var(--text-muted);
       cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
     }
 
     .filter-btn.active {
-      background: #e8f7ed;
-      border-color: #06C755;
-      color: #06C755;
-      font-weight: bold;
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary);
+      font-weight: 700;
     }
 
+    /* 列表行程卡片美化 */
     .item-card {
-      border: 1px solid #e1e4e8;
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--primary);
       border-radius: 12px;
-      padding: 14px;
+      padding: 14px 16px;
       margin-bottom: 12px;
+      background: #ffffff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .item-card.is-expired {
+      border-left-color: #94a3b8;
       background: #fafafa;
     }
 
@@ -164,84 +254,110 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
 
     .item-title {
-      font-weight: bold;
+      font-weight: 700;
       font-size: 16px;
-      color: #111;
+      color: #0f172a;
     }
 
     .item-badge {
-      font-size: 12px;
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-weight: bold;
+      font-size: 11.5px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 700;
     }
 
     .badge-active {
-      background: #e8f7ed;
-      color: #06C755;
+      background: var(--primary-light);
+      color: var(--primary);
     }
 
     .badge-expired {
-      background: #eeeeee;
-      color: #888888;
+      background: #e2e8f0;
+      color: #64748b;
     }
 
     .item-body {
       font-size: 13px;
-      color: #555;
-      line-height: 1.6;
+      color: #475569;
+      line-height: 1.7;
+    }
+
+    .item-body a {
+      color: #0284c7;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .item-body a:hover {
+      text-decoration: underline;
     }
 
     .item-timestamps {
       font-size: 11px;
-      color: #999;
-      margin-top: 8px;
-      border-top: 1px dashed #e1e4e8;
-      padding-top: 6px;
+      color: #94a3b8;
+      margin-top: 10px;
+      border-top: 1px dashed #e2e8f0;
+      padding-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
 
+    /* 底部操作按鈕 */
     .item-actions {
       display: flex;
       gap: 8px;
-      margin-top: 10px;
+      margin-top: 12px;
     }
 
     .action-btn {
       flex: 1;
-      padding: 8px;
-      border-radius: 6px;
+      padding: 7px 0;
+      border-radius: 8px;
       font-size: 13px;
-      font-weight: bold;
+      font-weight: 600;
       border: none;
       cursor: pointer;
+      transition: all 0.15s ease;
     }
 
     .edit-btn {
-      background: #f0f2f5;
-      color: #333;
-      border: 1px solid #ccc;
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+    }
+
+    .edit-btn:hover {
+      background: #e2e8f0;
     }
 
     .delete-btn {
-      background: #ffebeb;
-      color: #d93025;
+      background: var(--danger-light);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .delete-btn:hover {
+      background: #fecaca;
     }
 
     .empty-msg {
       text-align: center;
-      color: #999;
-      padding: 30px 0;
+      color: #94a3b8;
+      padding: 36px 0;
       font-size: 14px;
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <h2>🎫 搶票資訊登記</h2>
+    <div class="app-header">
+      <h2>🎫 搶票資訊登記</h2>
+    </div>
 
     <!-- 頁籤選單 -->
     <div class="tabs">
@@ -258,7 +374,7 @@
         <div class="form-group"><label>售票日期 <span class="required">*</span></label><input type="date" id="ticketDate" required></div>
         <div class="form-group"><label>售票時間 <span class="required">*</span></label><input type="time" id="ticketTime" required></div>
         <div class="form-group"><label>售票連結 <span class="required">*</span></label><input type="url" id="ticketLink" placeholder="https://..." required></div>
-        <div class="form-group"><label>訂購張數 <span class="required">*</span></label><input type="number" id="ticketCount" placeholder="2" min="1" required></div>
+        <div class="form-group"><label>訂購張數 <span class="required">*</span></label><input type="number" id="ticketCount" placeholder="例如：2" min="1" required></div>
         <div class="form-group"><label>平台帳號 <span class="required">*</span></label><input type="text" id="account" placeholder="電子郵件、身分證、電話...等" required></div>
         <div class="form-group"><label>平台密碼 <span class="required">*</span></label><input type="text" id="password" placeholder="登入密碼" required></div>
 
@@ -277,7 +393,7 @@
         <button class="filter-btn active" id="btnActiveList" onclick="filterList('active')">進行中 (未過期)</button>
         <button class="filter-btn" id="btnExpiredList" onclick="filterList('expired')">歷史紀錄 (已過期)</button>
       </div>
-      <div id="loadingText" style="text-align:center; padding: 20px; color:#888;">載入中...</div>
+      <div id="loadingText" style="text-align:center; padding: 24px; color: var(--text-muted); font-size: 14px;">載入中...</div>
       <div id="listContainer"></div>
     </div>
   </div>
@@ -289,36 +405,74 @@
     let allEvents = [];
     let currentFilter = 'active';
 
+    // 💡 監聽網址 Hash 變動（支援前進 / 後退 / 外部帶入）
+    window.addEventListener('hashchange', applyRouteFromHash);
+
     window.onload = async function() {
       try {
         await liff.init({ liffId: LIFF_ID });
-        // 若尚未登入，自動觸發登入
         if (!liff.isLoggedIn()) {
           liff.login();
           return;
         }
+
+        // 優先讀取 Hash，若無 Hash 再相容以前的 ?mode=list
         const params = new URLSearchParams(window.location.search);
-        if (params.get("mode") === "list") {
-          switchView('list');
+        if (!window.location.hash && params.get("mode") === "list") {
+          updateHash("list");
+        } else {
+          applyRouteFromHash();
         }
       } catch (err) {
-        console.error("LIFF 初始化失敗：", err);
+        console.error("初始化失敗：", err);
       }
     };
 
-    function switchView(view) {
+    // 💡 依據當前 URL Hash 解析並切換視圖
+    function applyRouteFromHash() {
+      const hash = window.location.hash.toLowerCase();
+      if (hash === '#list-expired') {
+        currentFilter = 'expired';
+        switchView('list', false);
+        setFilterBtnState('expired');
+      } else if (hash === '#list' || hash.startsWith('#list')) {
+        currentFilter = 'active';
+        switchView('list', false);
+        setFilterBtnState('active');
+      } else {
+        switchView('register', false);
+      }
+    }
+
+    // 💡 更新 Hash 且不產生多餘的歷史堆疊紀錄 (replaceState)
+    function updateHash(targetHash) {
+      if (window.location.hash !== targetHash) {
+        history.replaceState(null, "", targetHash);
+      }
+    }
+
+    function switchView(view, syncHash = true) {
       if (view === 'register') {
         document.getElementById('viewRegister').style.display = 'block';
         document.getElementById('viewList').style.display = 'none';
         document.getElementById('tabRegister').classList.add('active');
         document.getElementById('tabList').classList.remove('active');
+        if (syncHash) updateHash('#register');
       } else {
         document.getElementById('viewRegister').style.display = 'none';
         document.getElementById('viewList').style.display = 'block';
         document.getElementById('tabRegister').classList.remove('active');
         document.getElementById('tabList').classList.add('active');
+        if (syncHash) {
+          updateHash(currentFilter === 'expired' ? '#list-expired' : '#list');
+        }
         fetchEventList();
       }
+    }
+
+    function setFilterBtnState(type) {
+      document.getElementById('btnActiveList').classList.toggle('active', type === 'active');
+      document.getElementById('btnExpiredList').classList.toggle('active', type === 'expired');
     }
 
     async function getUserId() {
@@ -400,7 +554,7 @@
 
       const userId = await getUserId();
       if (!userId) {
-        document.getElementById('loadingText').innerText = "無法取得身分資料，請重新開啟。";
+        document.getElementById('loadingText').innerText = "無法取得資料，請重新開啟。";
         return;
       }
 
@@ -416,8 +570,8 @@
 
     function filterList(type) {
       currentFilter = type;
-      document.getElementById('btnActiveList').classList.toggle('active', type === 'active');
-      document.getElementById('btnExpiredList').classList.toggle('active', type === 'expired');
+      setFilterBtnState(type);
+      updateHash(type === 'expired' ? '#list-expired' : '#list');
       renderList();
     }
 
@@ -440,16 +594,16 @@
         const evTime = new Date(`${ev.ticketDate}T${ev.ticketTime}:00`).getTime();
         const isExpired = evTime < now;
         const item = document.createElement('div');
-        item.className = 'item-card';
+        item.className = `item-card ${isExpired ? 'is-expired' : ''}`;
         item.innerHTML = `
           <div class="item-header">
             <span class="item-title">${ev.name}</span>
             <span class="item-badge ${isExpired ? 'badge-expired' : 'badge-active'}">${isExpired ? '已過期' : '進行中'}</span>
           </div>
           <div class="item-body">
-            <div>⏰ 售票：${ev.ticketDate} ${ev.ticketTime}</div>
-            <div>🎫 張數：${ev.ticketCount}張 | 區域：${ev.ticketArea}</div>
-            <div>🔗 連結：<a href="${ev.ticketLink}" target="_blank">點此前往</a></div>
+            <div>⏰ 售票時間：<strong>${ev.ticketDate} ${ev.ticketTime}</strong></div>
+            <div>🎫 訂購張數：${ev.ticketCount}張 ｜ 區域：${ev.ticketArea}</div>
+            <div>🔗 售票連結：<a href="${ev.ticketLink}" target="_blank" rel="noopener">點此前往售票頁</a></div>
           </div>
           <div class="item-timestamps">
             <div>📌 首次登記：${ev.createdAt || '無記錄'}</div>
@@ -482,7 +636,7 @@
     }
 
     async function onDeleteClick(eventId) {
-      if (!confirm("確定要刪除這筆搶票登記嗎？日曆上的行程也會一併移除。")) return;
+      if (!confirm("確定要刪除這筆搶票登記嗎？")) return;
       const userId = await getUserId();
       try {
         await fetch(GAS_WEB_APP_URL, {
