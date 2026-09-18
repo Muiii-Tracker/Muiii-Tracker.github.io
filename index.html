@@ -320,7 +320,8 @@
     .detail-val a {
       color: #2563eb;
       text-decoration: none;
-      font-weight: 600;
+      font-weight: 500;
+      word-break: break-all;
     }
 
     .detail-val a:hover {
@@ -608,6 +609,19 @@
       renderList();
     }
 
+    window.togglePwd = function(idx, encodedPwd) {
+      const el = document.getElementById('pwd-' + idx);
+      const btn = document.getElementById('btn-pwd-' + idx);
+      const realPwd = decodeURIComponent(encodedPwd);
+      if (el.innerText === '••••••••') {
+        el.innerText = realPwd;
+        btn.innerText = '隱藏';
+      } else {
+        el.innerText = '••••••••';
+        btn.innerText = '顯示';
+      }
+    };
+
     function renderList() {
       const container = document.getElementById('listContainer');
       container.innerHTML = '';
@@ -669,7 +683,7 @@
             </div>
             <div class="detail-item">
               <span class="detail-label">🔗 售票連結</span>
-              <span class="detail-val"><a href="${ev.ticketLink}" target="_blank" rel="noopener">點此前往售票頁</a></span>
+              <span class="detail-val"><a href="${ev.ticketLink}" target="_blank" rel="noopener">${ev.ticketLink}</a></span>
             </div>
           </div>
 
@@ -686,19 +700,6 @@
         container.appendChild(item);
       });
     }
-
-    window.togglePwd = function(idx, encodedPwd) {
-      const el = document.getElementById('pwd-' + idx);
-      const btn = document.getElementById('btn-pwd-' + idx);
-      const realPwd = decodeURIComponent(encodedPwd);
-      if (el.innerText === '••••••••') {
-        el.innerText = realPwd;
-        btn.innerText = '隱藏';
-      } else {
-        el.innerText = '••••••••';
-        btn.innerText = '顯示';
-      }
-    };
 
     function onEditClick(ev) {
       document.getElementById('editEventId').value = ev.id;
