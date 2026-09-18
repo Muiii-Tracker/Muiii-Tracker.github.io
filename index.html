@@ -3,51 +3,247 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>搶票資訊管理中心</title>
+  <title>搶票資訊登記</title>
   <style>
-    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: #f4f6f8; margin: 0; padding: 16px 12px; display: flex; justify-content: center; min-height: 100vh; }
-    .card { background: #ffffff; width: 100%; max-width: 500px; border-radius: 16px; padding: 24px 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); height: fit-content; }
-    h2 { color: #1DB954; margin: 0 0 16px 0; font-size: 20px; text-align: center; }
-    
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 16px 12px;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 16px;
+      padding: 24px 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      height: fit-content;
+      margin: auto;
+    }
+
+    h2 {
+      color: #1DB954;
+      margin: 0 0 16px 0;
+      font-size: 20px;
+      text-align: center;
+    }
+
     /* 頁籤導覽 */
-    .tabs { display: flex; border-bottom: 2px solid #e1e4e8; margin-bottom: 18px; }
-    .tab-btn { flex: 1; padding: 10px; text-align: center; background: none; border: none; font-size: 15px; font-weight: 600; color: #666; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
-    .tab-btn.active { color: #06C755; border-bottom-color: #06C755; }
+    .tabs {
+      display: flex;
+      border-bottom: 2px solid #e1e4e8;
+      margin-bottom: 18px;
+    }
 
-    /* 表單元件 */
-    .section-divider { font-size: 13px; font-weight: 700; color: #06C755; margin: 16px 0 10px 0; padding-bottom: 4px; border-bottom: 2px solid #e8f7ed; }
-    .form-group { margin-bottom: 12px; }
-    label { font-weight: 600; display: block; margin-bottom: 4px; font-size: 14px; color: #333; }
-    .required { color: red; }
-    input { width: 100%; height: 42px; padding: 8px 12px; border: 1.5px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 14px; background: #fafafa; outline: none; }
-    input:focus { border-color: #06C755; background: #fff; }
-    .primary-btn { width: 100%; height: 46px; background: #06C755; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 16px; }
-    .primary-btn:disabled { background: #ccc; cursor: not-allowed; }
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      background: none;
+      border: none;
+      font-size: 15px;
+      font-weight: 600;
+      color: #666;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+    }
 
-    /* 列表元件 */
-    .filter-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
-    .filter-btn { flex: 1; padding: 6px 12px; font-size: 13px; border-radius: 20px; border: 1px solid #ddd; background: #fff; cursor: pointer; }
-    .filter-btn.active { background: #e8f7ed; border-color: #06C755; color: #06C755; font-weight: bold; }
-    .item-card { border: 1px solid #e1e4e8; border-radius: 12px; padding: 14px; margin-bottom: 12px; background: #fafafa; }
-    .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-    .item-title { font-weight: bold; font-size: 16px; color: #111; }
-    .item-badge { font-size: 12px; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
-    .badge-active { background: #e8f7ed; color: #06C755; }
-    .badge-expired { background: #eeeeee; color: #888888; }
-    .item-body { font-size: 13px; color: #555; line-height: 1.6; }
-    .item-timestamps { font-size: 11px; color: #999; margin-top: 8px; border-top: 1px dashed #e1e4e8; padding-top: 6px; }
-    .item-actions { display: flex; gap: 8px; margin-top: 10px; }
-    .action-btn { flex: 1; padding: 8px; border-radius: 6px; font-size: 13px; font-weight: bold; border: none; cursor: pointer; }
-    .edit-btn { background: #f0f2f5; color: #333; border: 1px solid #ccc; }
-    .delete-btn { background: #ffebeb; color: #d93025; }
-    .empty-msg { text-align: center; color: #999; padding: 30px 0; font-size: 14px; }
+    .tab-btn.active {
+      color: #06C755;
+      border-bottom-color: #06C755;
+    }
+
+    /* 區塊標題 */
+    .section-divider {
+      font-size: 13px;
+      font-weight: 700;
+      color: #06C755;
+      margin: 16px 0 10px 0;
+      padding-bottom: 4px;
+      border-bottom: 2px solid #e8f7ed;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 4px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .required {
+      color: red;
+    }
+
+    input {
+      width: 100%;
+      height: 42px;
+      padding: 8px 12px;
+      border: 1.5px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-size: 14px;
+      background: #fafafa;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    input:focus {
+      border-color: #06C755;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(6, 199, 85, 0.15);
+    }
+
+    .primary-btn {
+      width: 100%;
+      height: 46px;
+      background: #06C755;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 16px;
+      box-shadow: 0 4px 12px rgba(6, 199, 85, 0.25);
+    }
+
+    .primary-btn:disabled {
+      background: #ccc;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    /* 列表頁樣式 */
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .filter-btn {
+      flex: 1;
+      padding: 6px 12px;
+      font-size: 13px;
+      border-radius: 20px;
+      border: 1px solid #ddd;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .filter-btn.active {
+      background: #e8f7ed;
+      border-color: #06C755;
+      color: #06C755;
+      font-weight: bold;
+    }
+
+    .item-card {
+      border: 1px solid #e1e4e8;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+      background: #fafafa;
+    }
+
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .item-title {
+      font-weight: bold;
+      font-size: 16px;
+      color: #111;
+    }
+
+    .item-badge {
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+
+    .badge-active {
+      background: #e8f7ed;
+      color: #06C755;
+    }
+
+    .badge-expired {
+      background: #eeeeee;
+      color: #888888;
+    }
+
+    .item-body {
+      font-size: 13px;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    .item-timestamps {
+      font-size: 11px;
+      color: #999;
+      margin-top: 8px;
+      border-top: 1px dashed #e1e4e8;
+      padding-top: 6px;
+    }
+
+    .item-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+
+    .edit-btn {
+      background: #f0f2f5;
+      color: #333;
+      border: 1px solid #ccc;
+    }
+
+    .delete-btn {
+      background: #ffebeb;
+      color: #d93025;
+    }
+
+    .empty-msg {
+      text-align: center;
+      color: #999;
+      padding: 30px 0;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
   <div class="card">
-    <h2>🎫 搶票資訊管理系統</h2>
-    
+    <h2>🎫 搶票資訊登記</h2>
+
+    <!-- 頁籤選單 -->
     <div class="tabs">
       <button class="tab-btn active" id="tabRegister" onclick="switchView('register')">新增 / 編輯登記</button>
       <button class="tab-btn" id="tabList" onclick="switchView('list')">行程清單</button>
@@ -63,7 +259,7 @@
         <div class="form-group"><label>售票時間 <span class="required">*</span></label><input type="time" id="ticketTime" required></div>
         <div class="form-group"><label>售票連結 <span class="required">*</span></label><input type="url" id="ticketLink" placeholder="https://..." required></div>
         <div class="form-group"><label>訂購張數 <span class="required">*</span></label><input type="number" id="ticketCount" placeholder="2" min="1" required></div>
-        <div class="form-group"><label>平台帳號 <span class="required">*</span></label><input type="text" id="account" placeholder="電子郵件、電話...等" required></div>
+        <div class="form-group"><label>平台帳號 <span class="required">*</span></label><input type="text" id="account" placeholder="電子郵件、身分證、電話...等" required></div>
         <div class="form-group"><label>平台密碼 <span class="required">*</span></label><input type="text" id="password" placeholder="登入密碼" required></div>
 
         <div class="section-divider">✏️ 選填欄位</div>
@@ -96,7 +292,6 @@
     window.onload = async function() {
       try {
         await liff.init({ liffId: LIFF_ID });
-        // 檢查 URL query 是否帶入編輯參數
         const params = new URLSearchParams(window.location.search);
         if (params.get("mode") === "list") {
           switchView('list');
@@ -129,7 +324,6 @@
       return "";
     }
 
-    // 表單提交
     async function submitData() {
       const name = document.getElementById('name').value.trim();
       const ticketDate = document.getElementById('ticketDate').value;
@@ -148,9 +342,14 @@
       btn.disabled = true;
       btn.innerText = "處理中...";
 
-      const userId = await getUserId();
-      const editEventId = document.getElementById('editEventId').value;
+      let userId = "";
+      try {
+        userId = await getUserId();
+      } catch (e) {
+        console.warn("無法取得 Profile", e);
+      }
 
+      const editEventId = document.getElementById('editEventId').value;
       const payload = {
         action: "submit_form",
         userId: userId,
@@ -168,6 +367,7 @@
       };
 
       try {
+        // 先送出暫存至 GAS
         await fetch(GAS_WEB_APP_URL, {
           method: "POST",
           mode: "no-cors",
@@ -175,11 +375,17 @@
           body: JSON.stringify(payload)
         });
 
+        // LIFF 發送訊息觸發 Webhook
         if (liff.isInClient()) {
-          await liff.sendMessages([{ type: "text", text: "核對資料" }]);
+          await liff.sendMessages([
+            {
+              type: "text",
+              text: "核對資料"
+            }
+          ]);
           liff.closeWindow();
         } else {
-          alert("已送出！請回到 LINE 聊天室確認。");
+          alert("已送出！請到 LINE 聊天室確認。");
           btn.disabled = false;
           btn.innerText = "送出表單";
         }
@@ -190,7 +396,6 @@
       }
     }
 
-    // 抓取行程列表
     async function fetchEventList() {
       const userId = await getUserId();
       document.getElementById('loadingText').style.display = 'block';
@@ -274,7 +479,7 @@
     }
 
     async function onDeleteClick(eventId) {
-      if (!confirm("確定要刪除這筆搶票登記嗎？日曆上的行程也會一併移除。")) return;
+      if (!confirm("確定要刪除這筆搶票登記嗎？")) return;
       const userId = await getUserId();
       try {
         await fetch(GAS_WEB_APP_URL, {
