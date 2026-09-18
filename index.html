@@ -37,11 +37,10 @@
       color: var(--text-main);
     }
 
-    /* 主卡片：精緻陰影與頂部裝飾光條 */
     .card {
       background: var(--card-bg);
       width: 100%;
-      max-width: 520px;
+      max-width: 540px;
       border-radius: var(--radius-lg);
       padding: 28px 24px;
       box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.03);
@@ -61,7 +60,6 @@
       background: linear-gradient(90deg, #06C755, #10b981);
     }
 
-    /* 頂部標題 */
     .app-header {
       text-align: center;
       margin-bottom: 22px;
@@ -76,7 +74,6 @@
       letter-spacing: -0.3px;
     }
 
-    /* 第一層：導覽切換 (iOS Segmented 質感) */
     .tabs {
       display: flex;
       background: #f1f5f9;
@@ -107,7 +104,6 @@
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     }
 
-    /* 第二層：列表過濾標籤 */
     .filter-tabs {
       display: flex;
       background: #f8fafc;
@@ -139,7 +135,6 @@
       box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
     }
 
-    /* 區塊分割線 */
     .section-divider {
       font-size: 12px;
       font-weight: 700;
@@ -176,7 +171,6 @@
       font-weight: bold;
     }
 
-    /* 輸入框 */
     input {
       width: 100%;
       height: 46px;
@@ -207,7 +201,6 @@
       font-size: 14px;
     }
 
-    /* 送出按鈕 */
     .primary-btn {
       width: 100%;
       height: 50px;
@@ -240,38 +233,40 @@
       transform: none;
     }
 
-    /* 列表行程卡片 */
+    /* 詳細行程卡片樣式升級 */
     .item-card {
       border: 1.5px solid var(--border-color);
       border-radius: var(--radius-md);
-      padding: 16px;
-      margin-bottom: 14px;
+      padding: 18px;
+      margin-bottom: 16px;
       background: #ffffff;
       transition: all 0.2s ease;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
     }
 
     .item-card:hover {
       border-color: #cbd5e1;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
     }
 
     .item-card.is-expired {
       background: #fafafa;
       border-color: #e2e8f0;
-      opacity: 0.85;
+      opacity: 0.9;
     }
 
     .item-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #f1f5f9;
     }
 
     .item-title {
-      font-weight: 700;
-      font-size: 17px;
+      font-weight: 800;
+      font-size: 17.5px;
       color: var(--text-main);
     }
 
@@ -292,28 +287,71 @@
       color: var(--text-muted);
     }
 
-    .item-body {
-      font-size: 14px;
+    /* 條列式詳細資訊清單 */
+    .detail-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 13.5px;
       color: var(--text-sub);
-      line-height: 1.8;
     }
 
-    .item-body a {
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 4px 0;
+    }
+
+    .detail-label {
+      color: var(--text-muted);
+      font-weight: 600;
+      min-width: 90px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .detail-val {
+      color: var(--text-main);
+      font-weight: 600;
+      text-align: right;
+      word-break: break-all;
+      flex: 1;
+      margin-left: 10px;
+    }
+
+    .detail-val.highlight {
+      color: #06C755;
+      font-weight: 700;
+    }
+
+    .detail-val a {
       color: #2563eb;
       text-decoration: none;
-      font-weight: 600;
     }
 
-    .item-body a:hover {
+    .detail-val a:hover {
       text-decoration: underline;
+    }
+
+    .pwd-toggle-btn {
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 11px;
+      cursor: pointer;
+      margin-left: 4px;
+      color: #475569;
     }
 
     .item-timestamps {
       font-size: 11.5px;
       color: var(--text-muted);
-      margin-top: 12px;
+      margin-top: 14px;
       border-top: 1px dashed var(--border-color);
-      padding-top: 8px;
+      padding-top: 10px;
       display: flex;
       flex-direction: column;
       gap: 3px;
@@ -425,25 +463,19 @@
           liff.login();
           return;
         }
-
-        const params = new URLSearchParams(window.location.search);
-        if (!window.location.hash && params.get("mode") === "list") {
-          updateHash("list");
-        } else {
-          applyRouteFromHash();
-        }
+        applyRouteFromHash();
       } catch (err) {
         console.error("初始化失敗：", err);
       }
     };
 
     function applyRouteFromHash() {
-      const hash = window.location.hash.toLowerCase();
-      if (hash === '#list-expired') {
+      const rawHash = window.location.hash.toLowerCase().replace(/^[#\/]+/, '');
+      if (rawHash === 'list-expired') {
         currentFilter = 'expired';
         switchView('list', false);
         setFilterBtnState('expired');
-      } else if (hash === '#list' || hash.startsWith('#list')) {
+      } else if (rawHash === 'list') {
         currentFilter = 'active';
         switchView('list', false);
         setFilterBtnState('active');
@@ -452,9 +484,10 @@
       }
     }
 
-    function updateHash(targetHash) {
-      if (window.location.hash !== targetHash) {
-        history.replaceState(null, "", targetHash);
+    function updateHash(targetName) {
+      const cleanHash = '#' + targetName;
+      if (window.location.hash !== cleanHash) {
+        location.hash = targetName;
       }
     }
 
@@ -464,14 +497,14 @@
         document.getElementById('viewList').style.display = 'none';
         document.getElementById('tabRegister').classList.add('active');
         document.getElementById('tabList').classList.remove('active');
-        if (syncHash) updateHash('#register');
+        if (syncHash) updateHash('register');
       } else {
         document.getElementById('viewRegister').style.display = 'none';
         document.getElementById('viewList').style.display = 'block';
         document.getElementById('tabRegister').classList.remove('active');
         document.getElementById('tabList').classList.add('active');
         if (syncHash) {
-          updateHash(currentFilter === 'expired' ? '#list-expired' : '#list');
+          updateHash(currentFilter === 'expired' ? 'list-expired' : 'list');
         }
         fetchEventList();
       }
@@ -578,8 +611,21 @@
     function filterList(type) {
       currentFilter = type;
       setFilterBtnState(type);
-      updateHash(type === 'expired' ? '#list-expired' : '#list');
+      updateHash(type === 'expired' ? 'list-expired' : 'list');
       renderList();
+    }
+
+    // 密碼遮蔽/明文切換
+    function togglePwd(idx, realPwd) {
+      const el = document.getElementById('pwd-' + idx);
+      const btn = document.getElementById('btn-pwd-' + idx);
+      if (el.innerText === '••••••••') {
+        el.innerText = realPwd;
+        btn.innerText = '隱藏';
+      } else {
+        el.innerText = '••••••••';
+        btn.innerText = '顯示';
+      }
     }
 
     function renderList() {
@@ -597,25 +643,61 @@
         return;
       }
 
-      filtered.forEach(ev => {
+      filtered.forEach((ev, idx) => {
         const evTime = new Date(`${ev.ticketDate}T${ev.ticketTime}:00`).getTime();
         const isExpired = evTime < now;
         const item = document.createElement('div');
         item.className = `item-card ${isExpired ? 'is-expired' : ''}`;
+        
         item.innerHTML = `
           <div class="item-header">
             <span class="item-title">${ev.name}</span>
             <span class="item-badge ${isExpired ? 'badge-expired' : 'badge-active'}">${isExpired ? '已過期' : '進行中'}</span>
           </div>
-          <div class="item-body">
-            <div>⏰ 售票時間：<strong>${ev.ticketDate} ${ev.ticketTime}</strong></div>
-            <div>🎫 訂購張數：${ev.ticketCount}張 ｜ 區域：${ev.ticketArea}</div>
-            <div>🔗 售票連結：<a href="${ev.ticketLink}" target="_blank" rel="noopener">點此前往售票頁</a></div>
+          
+          <div class="detail-grid">
+            <div class="detail-row">
+              <span class="detail-label">⏰ 售票時間</span>
+              <span class="detail-val highlight">${ev.ticketDate} ${ev.ticketTime}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">🎫 訂購張數</span>
+              <span class="detail-val">${ev.ticketCount || 1} 張</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">💺 票價區域</span>
+              <span class="detail-val">${ev.ticketArea || '未指定'}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">📅 演出日期</span>
+              <span class="detail-val">${ev.eventDate || '未指定'}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">💳 優先購票</span>
+              <span class="detail-val">${ev.priorityCode || '無'}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">🔑 平台帳號</span>
+              <span class="detail-val">${ev.account || '未填寫'}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">🔒 平台密碼</span>
+              <span class="detail-val">
+                <span id="pwd-${idx}">••••••••</span>
+                <button type="button" class="pwd-toggle-btn" id="btn-pwd-${idx}" onclick="togglePwd(${idx}, '${encodeURIComponent(ev.password || '')}')">顯示</button>
+              </span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">🔗 售票連結</span>
+              <span class="detail-val"><a href="${ev.ticketLink}" target="_blank" rel="noopener">點此前往售票頁</a></span>
+            </div>
           </div>
+
           <div class="item-timestamps">
             <div>📌 首次登記：${ev.createdAt || '無記錄'}</div>
             ${ev.updatedAt ? `<div>✏️ 最後編輯：${ev.updatedAt}</div>` : ''}
           </div>
+
           <div class="item-actions">
             <button class="action-btn edit-btn" onclick='onEditClick(${JSON.stringify(ev)})'>✏️ 編輯</button>
             <button class="action-btn delete-btn" onclick="onDeleteClick('${ev.id}')">🗑️ 刪除</button>
@@ -624,6 +706,20 @@
         container.appendChild(item);
       });
     }
+
+    // 支援解碼查看密碼
+    window.togglePwd = function(idx, encodedPwd) {
+      const el = document.getElementById('pwd-' + idx);
+      const btn = document.getElementById('btn-pwd-' + idx);
+      const realPwd = decodeURIComponent(encodedPwd);
+      if (el.innerText === '••••••••') {
+        el.innerText = realPwd;
+        btn.innerText = '隱藏';
+      } else {
+        el.innerText = '••••••••';
+        btn.innerText = '顯示';
+      }
+    };
 
     function onEditClick(ev) {
       document.getElementById('editEventId').value = ev.id;
