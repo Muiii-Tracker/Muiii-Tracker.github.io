@@ -246,7 +246,7 @@
     <!-- 頁籤選單 -->
     <div class="tabs">
       <button class="tab-btn active" id="tabRegister" onclick="switchView('register')">新增 / 編輯登記</button>
-      <button class="tab-btn" id="tabList" onclick="switchView('list')">行程清單</button>
+      <button class="tab-btn" id="tabList" onclick="switchView('list')">我的登記列表</button>
     </div>
 
     <!-- 表單 View -->
@@ -292,6 +292,11 @@
     window.onload = async function() {
       try {
         await liff.init({ liffId: LIFF_ID });
+        // 若尚未登入，自動觸發登入
+        if (!liff.isLoggedIn()) {
+          liff.login();
+          return;
+        }
         const params = new URLSearchParams(window.location.search);
         if (params.get("mode") === "list") {
           switchView('list');
@@ -367,7 +372,6 @@
       };
 
       try {
-        // 先送出暫存至 GAS
         await fetch(GAS_WEB_APP_URL, {
           method: "POST",
           mode: "no-cors",
@@ -375,14 +379,8 @@
           body: JSON.stringify(payload)
         });
 
-        // LIFF 發送訊息觸發 Webhook
         if (liff.isInClient()) {
-          await liff.sendMessages([
-            {
-              type: "text",
-              text: "核對資料"
-            }
-          ]);
+          await liff.sendMessages([{ type: "text", text: "核對資料" }]);
           liff.closeWindow();
         } else {
           alert("已送出！請到 LINE 聊天室確認。");
@@ -397,12 +395,17 @@
     }
 
     async function fetchEventList() {
-      const userId = await getUserId();
       document.getElementById('loadingText').style.display = 'block';
       document.getElementById('listContainer').innerHTML = '';
 
+      const userId = await getUserId();
+      if (!userId) {
+        document.getElementById('loadingText').innerText = "無法取得身分資料，請重新開啟。";
+        return;
+      }
+
       try {
-        const resp = await fetch(`${GAS_WEB_APP_URL}?action=get_events&userId=${userId}`);
+        const resp = await fetch(`${GAS_WEB_APP_URL}?action=get_events&userId=${encodeURIComponent(userId)}`);
         allEvents = await resp.json();
         document.getElementById('loadingText').style.display = 'none';
         renderList();
@@ -479,13 +482,13 @@
     }
 
     async function onDeleteClick(eventId) {
-      if (!confirm("確定要刪除這筆搶票登記嗎？")) return;
+      if (!confirm("確定要刪除這筆搶票登記嗎？日曆上的行程也會一併移除。")) return;
       const userId = await getUserId();
       try {
         await fetch(GAS_WEB_APP_URL, {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: `action=delete_event&userId=${userId}&eventId=${eventId}`
+          body: `action=delete_event&userId=${encodeURIComponent(userId)}&eventId=${encodeURIComponent(eventId)}`
         });
         alert("刪除成功！");
         fetchEventList();
