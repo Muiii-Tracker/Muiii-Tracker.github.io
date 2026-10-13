@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MUIII 搶票後台管理系統</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;800&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif; background-color: #f8fafc; }
+  </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <!-- 密碼登入區塊 -->
+  <div id="loginSection" class="flex-grow flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-200/80 w-full max-w-md text-center">
+      <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">
+        <i class="fas fa-shield-halved"></i>
+      </div>
+      <h2 class="text-2xl font-black text-slate-900 mb-1">MUIII 後台登入</h2>
+      <p class="text-xs text-slate-400 mb-6 font-bold uppercase tracking-wider">TICKET MANAGEMENT SYSTEM</p>
+      
+      <div class="space-y-4">
+        <input type="password" id="adminKeyInput" placeholder="請輸入管理密碼..." class="w-full h-12 px-4 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 font-mono text-center font-bold tracking-widest text-lg">
+        <button onclick="loginAdmin()" class="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition shadow-lg shadow-emerald-600/20">進入管理台</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 後台主儀表板 -->
+  <div id="dashboardSection" class="hidden flex-grow pb-16">
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+      <div class="container mx-auto px-4 max-w-6xl py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="text-xl font-black italic tracking-tighter text-slate-900">MUIII<span class="text-emerald-600">.</span>ADMIN</span>
+          <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600">後台控制台</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="fetchAdminEvents()" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold transition flex items-center gap-1.5 text-slate-600">
+            <i class="fas fa-rotate"></i> 重新載入
+          </button>
+          <button onclick="logoutAdmin()" class="px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold transition">
+            登出
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container mx-auto px-4 max-w-6xl mt-6">
+      <!-- 篩選列 -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200 mb-6 shadow-sm">
+        <div class="relative w-full sm:w-80">
+          <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+          <input type="text" id="adminSearchInput" oninput="renderAdminList()" placeholder="搜尋姓名、帳號、售票時間..." class="w-full pl-9 pr-3 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-emerald-500 font-bold">
+        </div>
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <select id="statusFilter" onchange="renderAdminList()" class="px-3 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 font-bold text-slate-600 focus:outline-none">
+            <option value="all">所有狀態</option>
+            <option value="pending">待搶票 / 處理中</option>
+            <option value="success">🎉 搶票成功</option>
+            <option value="failed">❌ 搶票失敗</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="loading" class="text-center py-20 text-slate-400 font-bold text-sm">
+        <i class="fas fa-spinner animate-spin text-2xl text-emerald-500 mb-2 block"></i> 讀取委託資料中...
+      </div>
+
+      <div id="adminCardList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    </main>
+  </div>
+
+  <script>
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwbjjKVDfgjqGNmlbK30tfe-7ybMTYNyJ6820IDMM-CSgjIIY4yx8FckBpjzF1sH7Ac/exec";
+    let adminEvents = [];
+    let currentAdminKey = localStorage.getItem('muiii_admin_key') || '';
+
+    window.onload = function() {
+      if (currentAdminKey) {
+        showDashboard();
+      }
+    };
+
+    function loginAdmin() {
+      const key = document.getElementById('adminKeyInput').value.trim();
+      if (!key) return alert("請輸入密碼");
+      currentAdminKey = key;
+      localStorage.setItem('muiii_admin_key', key);
+      showDashboard();
+    }
+
+    function logoutAdmin() {
+      localStorage.removeItem('muiii_admin_key');
+      currentAdminKey = '';
+      document.getElementById('dashboardSection').classList.add('hidden');
+      document.getElementById('loginSection').classList.remove('hidden');
+    }
+
+    function showDashboard() {
+      document.getElementById('loginSection').classList.add('hidden');
+      document.getElementById('dashboardSection').classList.remove('hidden');
+      fetchAdminEvents();
+    }
+
+    async function fetchAdminEvents() {
+      document.getElementById('loading').classList.remove('hidden');
+      document.getElementById('adminCardList').innerHTML = '';
+
+      try {
+        const resp = await fetch(`${GAS_WEB_APP_URL}?action=get_all_events_admin&adminKey=${encodeURIComponent(currentAdminKey)}`);
+        const data = await resp.json();
+        
+        if (data.error === "Unauthorized") {
+          alert("密碼錯誤，請重新登入");
+          logoutAdmin();
+          return;
+        }
+
+        adminEvents = data;
+        document.getElementById('loading').classList.add('hidden');
+        renderAdminList();
+      } catch (e) {
+        document.getElementById('loading').innerHTML = "載入失敗，請確認網路或重新整理。";
+      }
+    }
+
+    function renderAdminList() {
+      const search = document.getElementById('adminSearchInput').value.toLowerCase().trim();
+      const statusSelect = document.getElementById('statusFilter').value;
+      const listContainer = document.getElementById('adminCardList');
+      listContainer.innerHTML = '';
+
+      const filtered = adminEvents.filter(ev => {
+        const matchText = (ev.name + ev.account + ev.ticketDate + ev.ticketTime).toLowerCase().includes(search);
+        const s = (ev.status || '').trim();
+        let matchStatus = true;
+        if (statusSelect === 'success') matchStatus = s === '成功' || s === '搶票成功';
+        else if (statusSelect === 'failed') matchStatus = s === '失敗' || s === '未搶到';
+        else if (statusSelect === 'pending') matchStatus = !s || (s !== '成功' && s !== '失敗');
+        return matchText && matchStatus;
+      });
+
+      if (filtered.length === 0) {
+        listContainer.innerHTML = `<div class="col-span-full text-center py-20 text-slate-400 font-bold">沒有符合條件的委託資料</div>`;
+        return;
+      }
+
+      filtered.forEach((ev) => {
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between";
+
+        let statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">⌛ 處理中</span>`;
+        if (ev.status === '成功' || ev.status === '搶票成功') {
+          statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">🎉 搶票成功</span>`;
+        } else if (ev.status === '失敗' || ev.status === '未搶到') {
+          statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">❌ 搶票失敗</span>`;
+        }
+
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+              <span class="text-lg font-black text-slate-900">${ev.name}</span>
+              ${statusBadge}
+            </div>
+
+            <div class="mt-3 space-y-2 text-xs font-medium text-slate-600">
+              <div class="flex justify-between"><span class="text-slate-400 font-bold">⏰ 售票時間</span><span class="font-bold text-slate-800">${ev.ticketDate} ${ev.ticketTime}</span></div>
+              <div class="flex justify-between"><span class="text-slate-400 font-bold">🎫 訂購張數</span><span class="font-bold text-emerald-600">${ev.ticketCount || 1} 張</span></div>
+              <div class="flex justify-between"><span class="text-slate-400 font-bold">💺 區域/演出</span><span>${ev.ticketArea} / ${ev.eventDate}</span></div>
+              <div class="flex justify-between"><span class="text-slate-400 font-bold">💳 優先代碼</span><span>${ev.priorityCode || '無'}</span></div>
+              
+              <!-- 帳號密碼快捷複製 -->
+              <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 mt-2 space-y-1">
+                <div class="flex items-center justify-between">
+                  <span class="font-mono text-slate-500 font-bold">🔑 ${ev.account}</span>
+                  <button onclick="copyText('${ev.account}')" class="text-emerald-600 hover:text-emerald-700 font-bold text-[11px]">複製帳號</button>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="font-mono text-slate-500 font-bold">🔒 ${ev.password}</span>
+                  <button onclick="copyText('${ev.password}')" class="text-emerald-600 hover:text-emerald-700 font-bold text-[11px]">複製密碼</button>
+                </div>
+              </div>
+
+              <div class="pt-1">
+                <a href="${ev.ticketLink}" target="_blank" class="text-blue-500 hover:underline truncate block text-[11px]"><i class="fas fa-link mr-1"></i>${ev.ticketLink}</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- 操作按鈕：一鍵標記 -->
+          <div class="mt-4 pt-3 border-t border-slate-100 flex gap-2">
+            <button onclick="updateEventStatus('${ev.id}', '成功')" class="flex-1 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs transition border border-emerald-200">
+              🎉 標記成功
+            </button>
+            <button onclick="updateEventStatus('${ev.id}', '失敗')" class="flex-1 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs transition border border-rose-200">
+              ❌ 標記失敗
+            </button>
+          </div>
+        `;
+        listContainer.appendChild(card);
+      });
+    }
+
+    async function updateEventStatus(eventId, status) {
+      if (!confirm(`確定要將此行程標記為【${status}】嗎？`)) return;
+
+      try {
+        await fetch(GAS_WEB_APP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "update_status",
+            adminKey: currentAdminKey,
+            eventId: eventId,
+            status: status
+          })
+        });
+
+        alert("更新成功！");
+        fetchAdminEvents();
+      } catch (e) {
+        alert("更新失敗：" + e.message);
+      }
+    }
+
+    function copyText(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert("已複製到剪貼簿！");
+      });
+    }
+  </script>
+</body>
+</html>
