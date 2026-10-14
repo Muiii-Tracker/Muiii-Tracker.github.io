@@ -119,7 +119,7 @@
         }
         .ticket-dashed-line::before { left: -29px; }
         .ticket-dashed-line::after { right: -29px; }
-
+        
         .cyber-select {
             background-color: #ffffff;
             color: var(--text-main);
@@ -275,13 +275,13 @@
                     <i class="fas fa-search text-slate-400 mr-3 text-sm"></i>
                     <input type="text" id="searchInput" placeholder="搜尋歌手、場館名稱、售票日期..." class="w-full bg-transparent text-slate-800 dark:text-white py-2 focus:outline-none placeholder-slate-300 dark:placeholder-slate-600 font-bold text-base">
                 </div>
-                <div class="grid grid-cols-2 lg:flex lg:flex-nowrap items-center gap-2 w-full lg:auto shrink-0 border-t border-gray-50 dark:border-slate-700 lg:border-t-0 pt-2 lg:pt-0 lg:pl-2">
-                    <select id="platform-filter" class="cyber-select font-bold text-slate-500 lg:w-auto lg:min-w-[120px]"><option value="all">所有平台</option></select>
-                    <select id="year-filter" class="cyber-select font-bold text-slate-500 lg:w-auto lg:min-w-[100px]"><option value="all">年份</option></select>
-                    <select id="month-filter" class="cyber-select font-bold text-slate-500 lg:w-auto lg:min-w-[100px]" disabled>
+                <div class="flex flex-wrap lg:flex-nowrap items-center gap-2 w-full lg:w-auto shrink-0 border-t border-gray-50 dark:border-slate-700 lg:border-t-0 pt-2 lg:pt-0 lg:pl-2">
+                    <select id="platform-filter" class="cyber-select font-bold text-slate-500 flex-1 min-w-[120px] lg:flex-none"><option value="all">所有平台</option></select>
+                    <select id="year-filter" class="cyber-select font-bold text-slate-500 flex-1 min-w-[90px] lg:flex-none"><option value="all">年份</option></select>
+                    <select id="month-filter" class="cyber-select font-bold text-slate-500 flex-1 min-w-[90px] lg:flex-none" disabled>
                         <option value="all">月份</option>
                     </select>
-                    <select id="sortSelect" class="cyber-select font-bold text-emerald-600 lg:w-auto lg:min-w-[110px]"><option value="desc">新到舊</option><option value="asc">舊到新</option></select>
+                    <select id="sortSelect" class="cyber-select font-bold text-emerald-600 flex-1 min-w-[100px] lg:flex-none"><option value="desc">新到舊</option><option value="asc">舊到新</option></select>
                     <button id="reset-btn" class="h-[44px] bg-slate-900 dark:bg-slate-700 hover:bg-black dark:hover:bg-slate-600 text-white px-5 rounded-xl flex items-center justify-center gap-2 transition text-xs font-black shrink-0 shadow-sm w-full lg:w-auto whitespace-nowrap"><i class="fas fa-undo text-[10px]"></i><span>重置</span></button>
                 </div>
             </div>
@@ -388,13 +388,19 @@
             document.getElementById('no-results').classList.add('hidden');
 
             try {
-                const targetUrl = window.location.protocol === 'file:' 
-                    ? proxyUrl + encodeURIComponent(csvUrl) 
-                    : csvUrl;
-
-                const response = await fetch(targetUrl);
-                if (!response.ok) throw new Error('網路連線回應錯誤');
-                const csvText = await response.text();
+                let csvText = '';
+                try {
+                    const targetUrl = window.location.protocol === 'file:' 
+                        ? proxyUrl + encodeURIComponent(csvUrl) 
+                        : csvUrl;
+                    const response = await fetch(targetUrl);
+                    if (!response.ok) throw new Error('連線回應異常');
+                    csvText = await response.text();
+                } catch (e) {
+                    const fallbackRes = await fetch(proxyUrl + encodeURIComponent(csvUrl));
+                    if (!fallbackRes.ok) throw new Error('備用伺服器連線失敗');
+                    csvText = await fallbackRes.text();
+                }
 
                 Papa.parse(csvText, {
                     header: true,
@@ -537,7 +543,7 @@
 
             monthFilter.disabled = false;
             monthFilter.innerHTML = '<option value="all">全月份</option>' + 
-                availableMonths.map(m => `<option value="${m}">${m}月</option>`).join('');
+                availableMonths.map(m => `<option value="${m}">${parseInt(m, 10)}月</option>`).join('');
             currentMonth = 'all';
         }
 
@@ -643,12 +649,17 @@
                     const platformTag = item[KEY_PLATFORM] ? `<span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-2 block">${item[KEY_PLATFORM]}</span>` : '';
 
                     const imgUrl = (item[KEY_IMAGE] || '').trim();
-                    const proofBtn = imgUrl ? `
-                        <button onclick="openProofModal('${encodeURIComponent(imgUrl)}', '${encodeURIComponent(item[KEY_TITLE])}')" class="ml-auto bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 text-slate-600 dark:text-slate-300 hover:text-emerald-600 px-2.5 py-1.5 rounded-lg text-[11px] font-bold flex items-center gap-1.5 border border-slate-200 dark:border-slate-700 transition">
-                            <i class="fas fa-camera text-xs text-emerald-500"></i>
-                            <span>查看截圖</span>
-                        </button>
-                    ` : '';
+                    let proofBtn = '';
+                    if (imgUrl) {
+                        const safeUrl = encodeURIComponent(imgUrl);
+                        const safeTitle = encodeURIComponent(item[KEY_TITLE] || '');
+                        proofBtn = `
+                            <button onclick="openProofModal('${safeUrl}', '${safeTitle}')" class="ml-auto bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 text-slate-600 dark:text-slate-300 hover:text-emerald-600 px-2.5 py-1.5 rounded-lg text-[11px] font-bold flex items-center gap-1.5 border border-slate-200 dark:border-slate-700 transition">
+                                <i class="fas fa-camera text-xs text-emerald-500"></i>
+                                <span>查看截圖</span>
+                            </button>
+                        `;
+                    }
 
                     card.innerHTML = `
                         <div class="flex-1 flex flex-col">
@@ -659,7 +670,7 @@
                                     <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 opacity-80">${y || '----'}</span>
                                 </div>
                                 <div class="p-5 md:p-6 flex-1 flex flex-col justify-center">
-                                    <h3 class="text-sm md:text-lg font-black text-slate-800 dark:text-white leading-snug line-clamp-3">${item[KEY_TITLE]}</h3>
+                                    <h3 class="text-sm md:text-lg font-black text-slate-800 dark:text-slate-100 leading-snug line-clamp-3">${item[KEY_TITLE]}</h3>
                                     ${platformTag}
                                 </div>
                             </div>
