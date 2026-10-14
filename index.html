@@ -17,6 +17,8 @@
       --card-bg: #ffffff;
       --danger: #ef4444;
       --danger-soft: #fee2e2;
+      --warning: #f59e0b;
+      --warning-soft: #fef3c7;
       --radius-lg: 20px;
       --radius-md: 12px;
     }
@@ -233,7 +235,6 @@
       transform: none;
     }
 
-    /* 列表行程卡片樣式 */
     .item-card {
       border: 1.5px solid var(--border-color);
       border-radius: var(--radius-md);
@@ -252,7 +253,7 @@
     .item-card.is-expired {
       background: #fafafa;
       border-color: #e2e8f0;
-      opacity: 0.9;
+      opacity: 0.95;
     }
 
     .item-header {
@@ -272,9 +273,12 @@
 
     .item-badge {
       font-size: 12px;
-      padding: 3px 10px;
+      padding: 4px 10px;
       border-radius: 20px;
       font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .badge-active {
@@ -282,12 +286,24 @@
       color: var(--primary);
     }
 
-    .badge-expired {
-      background: #f1f5f9;
-      color: var(--text-muted);
+    .badge-success {
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
     }
 
-    /* 上下結構詳細內容清單 */
+    .badge-failed {
+      background: var(--danger-soft);
+      color: var(--danger);
+      border: 1px solid #fecaca;
+    }
+
+    .badge-pending {
+      background: var(--warning-soft);
+      color: #b45309;
+      border: 1px solid #fde68a;
+    }
+
     .detail-list {
       display: flex;
       flex-direction: column;
@@ -402,13 +418,11 @@
       <h2>🎫 搶票資訊登記</h2>
     </div>
 
-    <!-- 頁籤選單 -->
     <div class="tabs">
       <button class="tab-btn active" id="tabRegister" onclick="switchView('register')">新增 / 編輯登記</button>
       <button class="tab-btn" id="tabList" onclick="switchView('list')">我的登記列表</button>
     </div>
 
-    <!-- 表單 View -->
     <div id="viewRegister">
       <form id="ticketForm">
         <input type="hidden" id="editEventId" value="">
@@ -430,7 +444,6 @@
       </form>
     </div>
 
-    <!-- 列表 View -->
     <div id="viewList" style="display: none;">
       <div class="filter-tabs">
         <button class="filter-btn active" id="btnActiveList" onclick="filterList('active')">進行中 (未過期)</button>
@@ -563,7 +576,7 @@
         await fetch(GAS_WEB_APP_URL, {
           method: "POST",
           mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload)
         });
 
@@ -622,6 +635,20 @@
       }
     };
 
+    function getBadgeHtml(isExpired, statusVal) {
+      if (!isExpired) {
+        return '<span class="item-badge badge-active">進行中</span>';
+      }
+      const val = (statusVal || '').trim();
+      if (val === '成功' || val === '搶票成功') {
+        return '<span class="item-badge badge-success">🎉 搶票成功</span>';
+      } else if (val === '失敗' || val === '未搶到' || val === '未得標') {
+        return '<span class="item-badge badge-failed">❌ 未搶到</span>';
+      } else {
+        return '<span class="item-badge badge-pending">⌛ 處理中</span>';
+      }
+    }
+
     function renderList() {
       const container = document.getElementById('listContainer');
       container.innerHTML = '';
@@ -643,10 +670,19 @@
         const item = document.createElement('div');
         item.className = `item-card ${isExpired ? 'is-expired' : ''}`;
         
+        const badgeHtml = getBadgeHtml(isExpired, ev.status);
+
+        const actionHtml = isExpired ? '' : `
+          <div class="item-actions">
+            <button class="action-btn edit-btn" onclick='onEditClick(${JSON.stringify(ev)})'>✏️ 編輯</button>
+            <button class="action-btn delete-btn" onclick="onDeleteClick('${ev.id}')">🗑️ 刪除</button>
+          </div>
+        `;
+
         item.innerHTML = `
           <div class="item-header">
             <span class="item-title">${ev.name}</span>
-            <span class="item-badge ${isExpired ? 'badge-expired' : 'badge-active'}">${isExpired ? '已過期' : '進行中'}</span>
+            ${badgeHtml}
           </div>
           
           <div class="detail-list">
@@ -692,10 +728,7 @@
             ${ev.updatedAt ? `<div>✏️ 最後編輯：${ev.updatedAt}</div>` : ''}
           </div>
 
-          <div class="item-actions">
-            <button class="action-btn edit-btn" onclick='onEditClick(${JSON.stringify(ev)})'>✏️ 編輯</button>
-            <button class="action-btn delete-btn" onclick="onDeleteClick('${ev.id}')">🗑️ 刪除</button>
-          </div>
+          ${actionHtml}
         `;
         container.appendChild(item);
       });
