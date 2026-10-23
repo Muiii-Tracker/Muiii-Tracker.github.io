@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MUIII 搶票後台管理系統</title>
+  <title>Muiii. 管理後台</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;800&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
@@ -19,15 +19,16 @@
     <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
       <div class="container mx-auto px-4 max-w-6xl py-4 flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-3">
-          <span class="text-xl font-black italic tracking-tighter text-slate-900">MUIII<span class="text-emerald-600">.</span>ADMIN</span>
+          <span class="text-xl font-black italic tracking-tighter text-slate-900">Muiii<span class="text-emerald-600">.</span></span>
+          <span class="text-xs font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">管理後台</span>
           <div class="flex bg-slate-100 p-1 rounded-xl gap-1">
-            <button id="navOrders" onclick="switchTab('orders')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition">📋 委託管理</button>
-            <button id="navRecords" onclick="switchTab('records')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition">🏆 新增公開戰績</button>
+            <button id="navOrders" onclick="switchTab('orders')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition">📋 管理資料</button>
+            <button id="navRecords" onclick="switchTab('records')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition">🏆 新增戰績</button>
           </div>
         </div>
         <div class="flex items-center gap-2">
           <a href="../Record/" target="_blank" class="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-xs font-bold transition flex items-center gap-1.5 text-emerald-700">
-            <i class="fas fa-external-link-alt"></i> 查看戰績頁
+            <i class="fas fa-external-link-alt"></i> 查看戰績
           </a>
           <button onclick="fetchAdminEvents()" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold transition flex items-center gap-1.5 text-slate-600">
             <i class="fas fa-rotate"></i> 重新載入
@@ -53,7 +54,7 @@
       </div>
 
       <div id="loading" class="text-center py-20 text-slate-400 font-bold text-sm">
-        <i class="fas fa-spinner animate-spin text-2xl text-emerald-500 mb-2 block"></i> 讀取委託資料中...
+        <i class="fas fa-spinner animate-spin text-2xl text-emerald-500 mb-2 block"></i> 資料中載入...
       </div>
 
       <div id="adminCardList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
@@ -63,14 +64,14 @@
       <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
         <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
           <div>
-            <h2 class="text-xl font-black text-slate-900">🏆 發布戰績至 #搶票戰績 試算表</h2>
-            <p class="text-xs text-slate-400 font-bold mt-1">送出後將自動插入至試算表最上方第 2 列，並同步顯示於前台戰績頁</p>
+            <h2 class="text-xl font-black text-slate-900">🏆 新增戰績至試算表</h2>
+            <p class="text-xs text-slate-400 font-bold mt-1">送出後將自動插入至試算表最上方</p>
           </div>
         </div>
 
         <div class="space-y-4">
           <div>
-            <label class="block text-xs font-bold text-slate-500 mb-1.5">售票日期 (格式：YYYY.MM.DD) *</label>
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">售票日期 *</label>
             <input type="text" id="recDate" placeholder="例如：2026.09.26" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 font-bold text-sm focus:outline-none focus:border-emerald-500">
           </div>
           <div>
@@ -79,22 +80,22 @@
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-bold text-slate-500 mb-1.5">售票平台 (對應試算表「網站」分頁) *</label>
+              <label class="block text-xs font-bold text-slate-500 mb-1.5">售票平台 *</label>
               <input type="text" id="recPlatform" list="platformOptions" placeholder="選擇或輸入售票平台" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 font-bold text-sm focus:outline-none focus:border-emerald-500">
               <datalist id="platformOptions"></datalist>
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-500 mb-1.5">張數 (多筆請用半形空格隔開) *</label>
+              <label class="block text-xs font-bold text-slate-500 mb-1.5">張數 *</label>
               <input type="text" id="recCount" placeholder="例如：12/05_黃3H區1800*2" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 font-bold text-sm focus:outline-none focus:border-emerald-500">
             </div>
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-500 mb-1.5">戰報截圖網址 (選填)</label>
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">戰報截圖網址</label>
             <input type="url" id="recImage" placeholder="https://..." class="w-full px-4 py-2.5 rounded-xl border border-slate-200 font-bold text-sm focus:outline-none focus:border-emerald-500">
           </div>
 
           <button id="btnSubmitRecord" onclick="submitNewRecord()" class="w-full py-3.5 mt-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow-lg shadow-emerald-600/20 transition">
-            ➕ 插入最新戰績至試算表
+            ➕ 新增戰績至試算表
           </button>
         </div>
       </div>
@@ -104,7 +105,7 @@
   <div id="publishModal" class="modal-bg" onclick="closePublishModal()">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200" onclick="event.stopPropagation()">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-        <h3 class="text-base font-black text-slate-900">🚀 標記成功 ＆ 同步發布戰績</h3>
+        <h3 class="text-base font-black text-slate-900">🚀 搶票成功</h3>
         <button onclick="closePublishModal()" class="text-slate-400 hover:text-slate-700"><i class="fas fa-times"></i></button>
       </div>
       <div class="space-y-3 mt-4 text-xs">
@@ -114,7 +115,7 @@
           <input type="text" id="modalDate" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold">
         </div>
         <div>
-          <label class="font-bold text-slate-500 block mb-1">節目名稱 (顯示於戰績頁) *</label>
+          <label class="font-bold text-slate-500 block mb-1">節目名稱 *</label>
           <input type="text" id="modalTitle" placeholder="請輸入演唱會或活動名稱..." class="w-full px-3 py-2 rounded-xl border border-emerald-500 bg-emerald-50/20 font-bold focus:outline-none">
         </div>
         <div class="grid grid-cols-2 gap-2">
@@ -123,18 +124,18 @@
             <input type="text" id="modalPlatform" list="platformOptions" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold">
           </div>
           <div>
-            <label class="font-bold text-slate-500 block mb-1">張數 (格式：日期_區域*張數)</label>
+            <label class="font-bold text-slate-500 block mb-1">張數</label>
             <input type="text" id="modalCount" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold">
           </div>
         </div>
         <div>
-          <label class="font-bold text-slate-500 block mb-1">截圖連結 (選填)</label>
+          <label class="font-bold text-slate-500 block mb-1">截圖連結</label>
           <input type="url" id="modalImage" placeholder="https://..." class="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold">
         </div>
       </div>
       <div class="mt-5 flex gap-2">
         <button onclick="closePublishModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 font-bold text-xs text-slate-600">取消</button>
-        <button id="btnModalConfirm" onclick="confirmPublishAndSuccess()" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20">確認標記並發布</button>
+        <button id="btnModalConfirm" onclick="confirmPublishAndSuccess()" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20">確認發布</button>
       </div>
     </div>
   </div>
@@ -254,7 +255,7 @@
       });
 
       if (filtered.length === 0) {
-        listContainer.innerHTML = `<div class="col-span-full text-center py-20 text-slate-400 font-bold">沒有符合條件的委託資料</div>`;
+        listContainer.innerHTML = `<div class="col-span-full text-center py-20 text-slate-400 font-bold">無符合資料</div>`;
         return;
       }
 
@@ -302,14 +303,11 @@
           </div>
 
           <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap gap-2">
-            <button onclick="openPublishModal(${realIndex})" class="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-sm">
-              🚀 成功＋同步發布戰績
+            <button onclick="openPublishModal(${realIndex})" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-sm">
+              🚀 搶票成功
             </button>
-            <button onclick="updateEventStatus('${ev.id}', '成功')" class="flex-1 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs transition border border-emerald-200">
-              🎉 僅標記成功
-            </button>
-            <button onclick="updateEventStatus('${ev.id}', '失敗')" class="flex-1 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs transition border border-rose-200">
-              ❌ 標記失敗
+            <button onclick="updateEventStatus('${ev.id}', '失敗')" class="flex-1 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs transition border border-rose-200">
+              ❌ 搶票失敗
             </button>
           </div>
         `;
@@ -370,7 +368,7 @@
         alert("操作失敗：" + e.message);
       } finally {
         btn.disabled = false;
-        btn.innerText = "確認標記並發布";
+        btn.innerText = "確認發布";
       }
     }
 
@@ -404,7 +402,7 @@
           })
         });
 
-        alert("已成功插入至 #搶票戰績 試算表最上方！");
+        alert("已成功插入至試算表最上方！");
         document.getElementById('recTitle').value = '';
         document.getElementById('recCount').value = '';
         document.getElementById('recImage').value = '';
@@ -412,7 +410,7 @@
         alert("寫入失敗：" + e.message);
       } finally {
         btn.disabled = false;
-        btn.innerText = "➕ 插入最新戰績至試算表";
+        btn.innerText = "➕ 新增戰績至試算表";
       }
     }
 
