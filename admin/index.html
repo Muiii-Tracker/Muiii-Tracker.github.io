@@ -9,18 +9,26 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;800&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif; background-color: #f8fafc; }
+    .modal-bg { display: none; position: fixed; inset: 0; z-index: 50; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 16px; }
+    .modal-bg.active { display: flex; }
   </style>
 </head>
 <body class="text-slate-800 antialiased min-h-screen flex flex-col">
 
-  <div id="dashboardSection" class="flex-grow pb-16">
+  <div class="flex-grow pb-16">
     <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
-      <div class="container mx-auto px-4 max-w-6xl py-4 flex items-center justify-between">
+      <div class="container mx-auto px-4 max-w-6xl py-4 flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-3">
           <span class="text-xl font-black italic tracking-tighter text-slate-900">MUIII<span class="text-emerald-600">.</span>ADMIN</span>
-          <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600">後台控制台</span>
+          <div class="flex bg-slate-100 p-1 rounded-xl gap-1">
+            <button id="navOrders" onclick="switchTab('orders')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition">📋 委託管理</button>
+            <button id="navRecords" onclick="switchTab('records')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition">🏆 新增公開戰績</button>
+          </div>
         </div>
         <div class="flex items-center gap-2">
+          <a href="index.html" target="_blank" class="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-xs font-bold transition flex items-center gap-1.5 text-emerald-700">
+            <i class="fas fa-external-link-alt"></i> 查看戰績頁
+          </a>
           <button onclick="fetchAdminEvents()" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold transition flex items-center gap-1.5 text-slate-600">
             <i class="fas fa-rotate"></i> 重新載入
           </button>
@@ -28,14 +36,14 @@
       </div>
     </header>
 
-    <main class="container mx-auto px-4 max-w-6xl mt-6">
+    <main id="tabOrders" class="container mx-auto px-4 max-w-6xl mt-6">
       <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200 mb-6 shadow-sm">
         <div class="relative w-full sm:w-80">
           <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
           <input type="text" id="adminSearchInput" oninput="renderAdminList()" placeholder="搜尋姓名、帳號、售票時間..." class="w-full pl-9 pr-3 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-emerald-500 font-bold">
         </div>
         <div class="flex items-center gap-2 w-full sm:w-auto">
-          <select id="statusFilter" onchange="renderAdminList()" class="px-3 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 font-bold text-slate-600 focus:outline-none">
+          <select id="statusFilter" onchange="renderAdminList()" class="px-3 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 font-bold text-slate-600 focus:outline-none w-full sm:w-auto">
             <option value="all">所有狀態</option>
             <option value="pending">待搶票 / 處理中</option>
             <option value="success">🎉 搶票成功</option>
@@ -50,15 +58,162 @@
 
       <div id="adminCardList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
     </main>
+
+    <main id="tabRecords" class="container mx-auto px-4 max-w-2xl mt-6 hidden">
+      <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+        <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-xl font-black text-slate-900">🏆 發布戰績至 #搶票戰績 試算表</h2>
+            <p class="text-xs text-slate-400 font-bold mt-1">送出後將自動插入至試算表最上方第 2 列，並同步顯示於前台戰績頁</p>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">售票日期 (格式：YYYY.MM.DD) *</label>
+            <input type="text" id="recDate" placeholder="例如：2026.09.26" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 font-bold text-sm focus:outline-none focus:border-emerald-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">節目名稱 *</label>
+            <input type="text" id="recTitle" placeholder="例如：MAMAMOO 2026 WORLD TOUR ＜4WARD＞ in TAIPEI" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 font-bold text-sm focus:outline-none focus:border-emerald-500">
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-500 mb-1.5">售票平台 (對應試算表「網站」分頁) *</label>
+              <input type="text" id="recPlatform" list="platformOptions" placeholder="選擇或輸入售票平台" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 font-bold text-sm focus:outline-none focus:border-emerald-500">
+              <datalist id="platformOptions"></datalist>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 mb-1.5">張數 (多筆請用半形空格隔開) *</label>
+              <input type="text" id="recCount" placeholder="例如：12/05_黃3H區1800*2" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 font-bold text-sm focus:outline-none focus:border-emerald-500">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">戰報截圖網址 (選填)</label>
+            <input type="url" id="recImage" placeholder="https://..." class="w-full px-4 py-2.5 rounded-xl border border-slate-200 font-bold text-sm focus:outline-none focus:border-emerald-500">
+          </div>
+
+          <button id="btnSubmitRecord" onclick="submitNewRecord()" class="w-full py-3.5 mt-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow-lg shadow-emerald-600/20 transition">
+            ➕ 插入最新戰績至試算表
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="publishModal" class="modal-bg" onclick="closePublishModal()">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="text-base font-black text-slate-900">🚀 標記成功 ＆ 同步發布戰績</h3>
+        <button onclick="closePublishModal()" class="text-slate-400 hover:text-slate-700"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="space-y-3 mt-4 text-xs">
+        <input type="hidden" id="modalEventId">
+        <div>
+          <label class="font-bold text-slate-500 block mb-1">售票日期</label>
+          <input type="text" id="modalDate" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold">
+        </div>
+        <div>
+          <label class="font-bold text-slate-500 block mb-1">節目名稱 (顯示於戰績頁) *</label>
+          <input type="text" id="modalTitle" placeholder="請輸入演唱會或活動名稱..." class="w-full px-3 py-2 rounded-xl border border-emerald-500 bg-emerald-50/20 font-bold focus:outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="font-bold text-slate-500 block mb-1">售票平台</label>
+            <input type="text" id="modalPlatform" list="platformOptions" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold">
+          </div>
+          <div>
+            <label class="font-bold text-slate-500 block mb-1">張數 (格式：日期_區域*張數)</label>
+            <input type="text" id="modalCount" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold">
+          </div>
+        </div>
+        <div>
+          <label class="font-bold text-slate-500 block mb-1">截圖連結 (選填)</label>
+          <input type="url" id="modalImage" placeholder="https://..." class="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold">
+        </div>
+      </div>
+      <div class="mt-5 flex gap-2">
+        <button onclick="closePublishModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 font-bold text-xs text-slate-600">取消</button>
+        <button id="btnModalConfirm" onclick="confirmPublishAndSuccess()" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20">確認標記並發布</button>
+      </div>
+    </div>
   </div>
 
   <script>
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwbjjKVDfgjqGNmlbK30tfe-7ybMTYNyJ6820IDMM-CSgjIIY4yx8FckBpjzF1sH7Ac/exec";
     let adminEvents = [];
+    let defaultPlatforms = [
+      "Tixcraft 拓元售票", "添翼 Teamear", "Indievox 獨立音樂", "KKTIX", "iBon",
+      "FamiTicket 全網", "Kham 寬宏售票", "Ticket.com.tw 年代", "UDN售票網",
+      "TicketPlus 遠大", "FunOne Tickets", "FANSI GO", "Urbtix 城市",
+      "Cityline 買飛", "HKTicketing 快達票", "澳門銀河", "TicketMaster Singapore",
+      "Ticketek Australia", "KLOOK"
+    ];
 
     window.onload = function() {
+      renderPlatformDatalist(defaultPlatforms);
       fetchAdminEvents();
+      const d = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      document.getElementById('recDate').value = `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())}`;
     };
+
+    function renderPlatformDatalist(list) {
+      const dl = document.getElementById('platformOptions');
+      dl.innerHTML = list.map(p => `<option value="${p}">`).join('');
+    }
+
+    function switchTab(tab) {
+      const isOrders = tab === 'orders';
+      document.getElementById('tabOrders').classList.toggle('hidden', !isOrders);
+      document.getElementById('tabRecords').classList.toggle('hidden', isOrders);
+      document.getElementById('navOrders').className = isOrders
+        ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition"
+        : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition";
+      document.getElementById('navRecords').className = !isOrders
+        ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition"
+        : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition";
+    }
+
+    function detectPlatformFromUrl(url) {
+      const u = (url || '').toLowerCase();
+      if (u.includes('tixcraft')) return 'Tixcraft 拓元售票';
+      if (u.includes('teamear')) return '添翼 Teamear';
+      if (u.includes('indievox')) return 'Indievox 獨立音樂';
+      if (u.includes('kktix')) return 'KKTIX';
+      if (u.includes('ibon')) return 'iBon';
+      if (u.includes('fami')) return 'FamiTicket 全網';
+      if (u.includes('kham')) return 'Kham 寬宏售票';
+      if (u.includes('ticket.com.tw')) return 'Ticket.com.tw 年代';
+      if (u.includes('udnfunlife')) return 'UDN售票網';
+      if (u.includes('ticketplus')) return 'TicketPlus 遠大';
+      if (u.includes('funone')) return 'FunOne Tickets';
+      if (u.includes('fansi')) return 'FANSI GO';
+      if (u.includes('urbtix')) return 'Urbtix 城市';
+      if (u.includes('cityline')) return 'Cityline 買飛';
+      if (u.includes('hkticketing')) return 'HKTicketing 快達票';
+      if (u.includes('galaxymacau')) return '澳門銀河';
+      if (u.includes('ticketmaster')) return 'TicketMaster Singapore';
+      if (u.includes('ticketek')) return 'Ticketek Australia';
+      if (u.includes('klook')) return 'KLOOK';
+      return 'Tixcraft 拓元售票';
+    }
+
+    function buildFormattedCountTag(ev) {
+      let datePrefix = "";
+      if (ev.eventDate && ev.eventDate !== "未指定") {
+        const parts = ev.eventDate.split(/[-/.]/);
+        if (parts.length >= 3) {
+          datePrefix = `${parts[1].padStart(2, '0')}/${parts[2].padStart(2, '0')}_`;
+        }
+      }
+      const areaStr = (ev.ticketArea && ev.ticketArea !== "未指定") ? ev.ticketArea.replace(/\s+/g, '') : "";
+      const cnt = ev.ticketCount || 1;
+      if (datePrefix || areaStr) {
+        return `${datePrefix}${areaStr}*${cnt}`;
+      }
+      return `${cnt}張`;
+    }
 
     async function fetchAdminEvents() {
       document.getElementById('loading').classList.remove('hidden');
@@ -67,7 +222,14 @@
       try {
         const resp = await fetch(`${GAS_WEB_APP_URL}?action=get_all_events_admin`);
         const data = await resp.json();
-        adminEvents = Array.isArray(data) ? data : [];
+        if (Array.isArray(data)) {
+          adminEvents = data;
+        } else {
+          adminEvents = Array.isArray(data.events) ? data.events : [];
+          if (Array.isArray(data.platforms) && data.platforms.length > 0) {
+            renderPlatformDatalist(data.platforms);
+          }
+        }
         document.getElementById('loading').classList.add('hidden');
         renderAdminList();
       } catch (e) {
@@ -107,6 +269,8 @@
           statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">❌ 搶票失敗</span>`;
         }
 
+        const realIndex = adminEvents.findIndex(item => item.id === ev.id);
+
         card.innerHTML = `
           <div>
             <div class="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -137,9 +301,12 @@
             </div>
           </div>
 
-          <div class="mt-4 pt-3 border-t border-slate-100 flex gap-2">
+          <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap gap-2">
+            <button onclick="openPublishModal(${realIndex})" class="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-sm">
+              🚀 成功＋同步發布戰績
+            </button>
             <button onclick="updateEventStatus('${ev.id}', '成功')" class="flex-1 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs transition border border-emerald-200">
-              🎉 標記成功
+              🎉 僅標記成功
             </button>
             <button onclick="updateEventStatus('${ev.id}', '失敗')" class="flex-1 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs transition border border-rose-200">
               ❌ 標記失敗
@@ -148,6 +315,105 @@
         `;
         listContainer.appendChild(card);
       });
+    }
+
+    function openPublishModal(idx) {
+      const ev = adminEvents[idx];
+      if (!ev) return;
+      document.getElementById('modalEventId').value = ev.id;
+      document.getElementById('modalDate').value = (ev.ticketDate || '').replace(/-/g, '.');
+      document.getElementById('modalTitle').value = '';
+      document.getElementById('modalPlatform').value = detectPlatformFromUrl(ev.ticketLink);
+      document.getElementById('modalCount').value = buildFormattedCountTag(ev);
+      document.getElementById('modalImage').value = '';
+      document.getElementById('publishModal').classList.add('active');
+    }
+
+    function closePublishModal() {
+      document.getElementById('publishModal').classList.remove('active');
+    }
+
+    async function confirmPublishAndSuccess() {
+      const eventId = document.getElementById('modalEventId').value;
+      const saleDate = document.getElementById('modalDate').value.trim();
+      const title = document.getElementById('modalTitle').value.trim();
+      const platform = document.getElementById('modalPlatform').value.trim();
+      const countTag = document.getElementById('modalCount').value.trim();
+      const imageUrl = document.getElementById('modalImage').value.trim();
+
+      if (!title) return alert("請輸入節目或演唱會名稱！");
+
+      const btn = document.getElementById('btnModalConfirm');
+      btn.disabled = true;
+      btn.innerText = "處理中...";
+
+      try {
+        await fetch(GAS_WEB_APP_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "publish_and_mark_success",
+            eventId: eventId,
+            saleDate: saleDate,
+            title: title,
+            platform: platform,
+            countTag: countTag,
+            imageUrl: imageUrl
+          })
+        });
+
+        alert("已標記成功並插入至戰績試算表最上方！");
+        closePublishModal();
+        setTimeout(fetchAdminEvents, 1200);
+      } catch (e) {
+        alert("操作失敗：" + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "確認標記並發布";
+      }
+    }
+
+    async function submitNewRecord() {
+      const saleDate = document.getElementById('recDate').value.trim();
+      const title = document.getElementById('recTitle').value.trim();
+      const platform = document.getElementById('recPlatform').value.trim();
+      const countTag = document.getElementById('recCount').value.trim();
+      const imageUrl = document.getElementById('recImage').value.trim();
+
+      if (!saleDate || !title || !countTag || !platform) {
+        return alert("請填寫所有必填欄位！");
+      }
+
+      const btn = document.getElementById('btnSubmitRecord');
+      btn.disabled = true;
+      btn.innerText = "寫入中...";
+
+      try {
+        await fetch(GAS_WEB_APP_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "add_record",
+            saleDate: saleDate,
+            title: title,
+            platform: platform,
+            countTag: countTag,
+            imageUrl: imageUrl
+          })
+        });
+
+        alert("已成功插入至 #搶票戰績 試算表最上方！");
+        document.getElementById('recTitle').value = '';
+        document.getElementById('recCount').value = '';
+        document.getElementById('recImage').value = '';
+      } catch (e) {
+        alert("寫入失敗：" + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "➕ 插入最新戰績至試算表";
+      }
     }
 
     async function updateEventStatus(eventId, status) {
