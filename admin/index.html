@@ -274,14 +274,38 @@
         const card = document.createElement('div');
         card.className = "bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between";
 
+        const s = (ev.status || '').trim();
+        const isHandled = (s === '成功' || s === '搶票成功' || s === '失敗' || s === '未搶到');
+
         let statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">⌛ 處理中</span>`;
-        if (ev.status === '成功' || ev.status === '搶票成功') {
-          statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">🎉 搶票成功</span>`;
-        } else if (ev.status === '失敗' || ev.status === '未搶到') {
-          statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">❌ 搶票失敗</span>`;
+        if (s === '成功' || s === '搶票成功') {
+          statusBadge = `
+            <div class="flex items-center gap-1.5">
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">🎉 搶票成功</span>
+              <button onclick="updateEventStatus('${ev.id}', '')" title="重設為待處理" class="text-slate-400 hover:text-slate-600 text-xs px-1.5 py-0.5 rounded hover:bg-slate-100 transition"><i class="fas fa-undo"></i></button>
+            </div>
+          `;
+        } else if (s === '失敗' || s === '未搶到') {
+          statusBadge = `
+            <div class="flex items-center gap-1.5">
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">❌ 搶票失敗</span>
+              <button onclick="updateEventStatus('${ev.id}', '')" title="重設為待處理" class="text-slate-400 hover:text-slate-600 text-xs px-1.5 py-0.5 rounded hover:bg-slate-100 transition"><i class="fas fa-undo"></i></button>
+            </div>
+          `;
         }
 
         const realIndex = adminEvents.findIndex(item => item.id === ev.id);
+
+        const actionButtonsHtml = isHandled ? '' : `
+          <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap gap-2">
+            <button onclick="openPublishModal(${realIndex})" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-sm">
+              🚀 搶票成功
+            </button>
+            <button onclick="updateEventStatus('${ev.id}', '失敗')" class="flex-1 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs transition border border-rose-200">
+              ❌ 搶票失敗
+            </button>
+          </div>
+        `;
 
         card.innerHTML = `
           <div>
@@ -313,14 +337,7 @@
             </div>
           </div>
 
-          <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap gap-2">
-            <button onclick="openPublishModal(${realIndex})" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-sm">
-              🚀 搶票成功
-            </button>
-            <button onclick="updateEventStatus('${ev.id}', '失敗')" class="flex-1 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs transition border border-rose-200">
-              ❌ 搶票失敗
-            </button>
-          </div>
+          ${actionButtonsHtml}
         `;
         listContainer.appendChild(card);
       });
@@ -426,7 +443,8 @@
     }
 
     async function updateEventStatus(eventId, status) {
-      if (!confirm(`確定要將此行程標記為【${status}】嗎？`)) return;
+      const promptText = status ? `確定要將此行程標記為【${status}】嗎？` : "確定要重設為【待處理】狀態嗎？";
+      if (!confirm(promptText)) return;
 
       try {
         await fetch(GAS_WEB_APP_URL, {
