@@ -23,14 +23,15 @@
           <span class="text-xs font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">管理後台</span>
           <div class="flex bg-slate-100 p-1 rounded-xl gap-1">
             <button id="navOrders" onclick="switchTab('orders')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition">📋 管理資料</button>
-            <button id="navRecords" onclick="switchTab('records')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition">🏆 新增戰績</button>
+            <button id="navRecords" onclick="switchTab('records')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition">🏆 戰績管理</button>
+            <button id="navAddRecord" onclick="switchTab('addRecord')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition">➕ 新增戰績</button>
           </div>
         </div>
         <div class="flex items-center gap-2">
           <a href="../Record/" target="_blank" class="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-xs font-bold transition flex items-center gap-1.5 text-emerald-700">
             <i class="fas fa-external-link-alt"></i> 查看戰績
           </a>
-          <button onclick="fetchAdminEvents()" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold transition flex items-center gap-1.5 text-slate-600">
+          <button onclick="refreshCurrentTab()" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold transition flex items-center gap-1.5 text-slate-600">
             <i class="fas fa-rotate"></i> 重新載入
           </button>
         </div>
@@ -57,14 +58,38 @@
         </div>
       </div>
 
-      <div id="loading" class="text-center py-20 text-slate-400 font-bold text-sm">
+      <div id="loadingOrders" class="text-center py-20 text-slate-400 font-bold text-sm">
         <i class="fas fa-spinner animate-spin text-2xl text-emerald-500 mb-2 block"></i> 資料中載入...
       </div>
 
       <div id="adminCardList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
     </main>
 
-    <main id="tabRecords" class="container mx-auto px-4 max-w-2xl mt-6 hidden">
+    <main id="tabRecords" class="container mx-auto px-4 max-w-6xl mt-6 hidden">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200 mb-6 shadow-sm">
+        <div class="relative w-full sm:w-80">
+          <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+          <input type="text" id="recordSearchInput" oninput="renderRecordsList()" placeholder="搜尋戰績節目、平台、日期..." class="w-full pl-9 pr-3 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-emerald-500 font-bold">
+        </div>
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <select id="recordSortSelect" onchange="renderRecordsList()" class="px-3 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 font-bold text-emerald-600 focus:outline-none flex-1 sm:flex-none">
+            <option value="desc">新到舊</option>
+            <option value="asc">舊到新</option>
+          </select>
+          <button onclick="switchTab('addRecord')" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-sm whitespace-nowrap">
+            ➕ 新增戰績
+          </button>
+        </div>
+      </div>
+
+      <div id="loadingRecords" class="text-center py-20 text-slate-400 font-bold text-sm">
+        <i class="fas fa-spinner animate-spin text-2xl text-emerald-500 mb-2 block"></i> 資料中載入...
+      </div>
+
+      <div id="recordsCardList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </main>
+
+    <main id="tabAddRecord" class="container mx-auto px-4 max-w-2xl mt-6 hidden">
       <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
         <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
           <div>
@@ -175,9 +200,64 @@
     </div>
   </div>
 
+  <div id="editRecordModal" class="modal-bg" onclick="closeEditRecordModal()">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="text-base font-black text-slate-900">✏️ 修改戰績資料</h3>
+        <button onclick="closeEditRecordModal()" class="text-slate-400 hover:text-slate-700"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="space-y-3 mt-4 text-xs">
+        <input type="hidden" id="editRecordRowIndex">
+        <div>
+          <label class="font-bold text-slate-500 block mb-1">售票日期 *</label>
+          <input type="text" id="editRecordDate" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold">
+        </div>
+        <div>
+          <label class="font-bold text-slate-500 block mb-1">節目名稱 *</label>
+          <input type="text" id="editRecordTitle" class="w-full px-3 py-2 rounded-xl border border-emerald-500 bg-emerald-50/20 font-bold focus:outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="font-bold text-slate-500 block mb-1">售票平台 *</label>
+            <input type="text" id="editRecordPlatform" list="platformOptions" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold">
+          </div>
+          <div>
+            <label class="font-bold text-slate-500 block mb-1">張數 *</label>
+            <input type="text" id="editRecordCount" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold">
+          </div>
+        </div>
+        <div>
+          <label class="font-bold text-slate-500 block mb-1">戰報截圖</label>
+          <div id="editDropZone" onclick="triggerFileInput('editFileInput')" class="border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-xl p-3 text-center cursor-pointer transition bg-slate-50 relative group">
+            <input type="file" id="editFileInput" accept="image/*" class="hidden" onchange="handleFileChange(event, 'editPreview', 'editDropPrompt', 'edit')">
+            <div id="editDropPrompt" class="py-2">
+              <i class="fas fa-camera text-xl text-slate-400 mb-1 block group-hover:text-emerald-500 transition"></i>
+              <span class="text-xs font-bold text-slate-600 block">點擊更換或按 Ctrl + V 貼上新截圖</span>
+            </div>
+            <div id="editPreviewContainer" class="hidden relative">
+              <img id="editPreview" src="" class="max-h-36 mx-auto rounded-lg shadow-sm object-contain">
+              <button type="button" onclick="clearImage(event, 'edit')" class="absolute top-1 right-1 bg-slate-900/70 hover:bg-slate-900 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] transition">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+          <div class="mt-1.5">
+            <input type="url" id="editRecordImage" placeholder="或填寫圖片網址 https://..." class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-medium focus:outline-none focus:border-emerald-500">
+          </div>
+        </div>
+      </div>
+      <div class="mt-5 flex gap-2">
+        <button onclick="closeEditRecordModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 font-bold text-xs text-slate-600">取消</button>
+        <button id="btnEditRecordConfirm" onclick="confirmUpdateRecord()" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20">儲存變更</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwbjjKVDfgjqGNmlbK30tfe-7ybMTYNyJ6820IDMM-CSgjIIY4yx8FckBpjzF1sH7Ac/exec";
+    let currentTab = 'orders';
     let adminEvents = [];
+    let sheetRecords = [];
     let defaultPlatforms = [
       "Tixcraft 拓元售票", "添翼 Teamear", "Indievox 獨立音樂", "KKTIX", "iBon",
       "FamiTicket 全網", "Kham 寬宏售票", "Ticket.com.tw 年代", "UDN售票網",
@@ -188,6 +268,7 @@
 
     let recBase64 = "";
     let modalBase64 = "";
+    let editBase64 = "";
 
     window.onload = function() {
       renderPlatformDatalist(defaultPlatforms);
@@ -202,6 +283,14 @@
       document.getElementById(id).click();
     }
 
+    function refreshCurrentTab() {
+      if (currentTab === 'orders') {
+        fetchAdminEvents();
+      } else if (currentTab === 'records') {
+        fetchSheetRecords();
+      }
+    }
+
     function setupPasteListener() {
       document.addEventListener("paste", function(e) {
         const items = (e.clipboardData || e.originalEvent.clipboardData).items;
@@ -214,8 +303,9 @@
         }
         if (!blob) return;
 
-        const isModalOpen = document.getElementById('publishModal').classList.contains('active');
-        if (isModalOpen) {
+        if (document.getElementById('editRecordModal').classList.contains('active')) {
+          processImageFile(blob, 'editPreview', 'editDropPrompt', 'edit');
+        } else if (document.getElementById('publishModal').classList.contains('active')) {
           processImageFile(blob, 'modalPreview', 'modalDropPrompt', 'modal');
         } else {
           processImageFile(blob, 'recPreview', 'recDropPrompt', 'rec');
@@ -240,6 +330,12 @@
           document.getElementById('modalPreview').src = b64;
           document.getElementById('modalDropPrompt').classList.add('hidden');
           document.getElementById('modalPreviewContainer').classList.remove('hidden');
+        } else if (type === 'edit') {
+          editBase64 = b64;
+          document.getElementById('editRecordImage').value = '';
+          document.getElementById('editPreview').src = b64;
+          document.getElementById('editDropPrompt').classList.add('hidden');
+          document.getElementById('editPreviewContainer').classList.remove('hidden');
         } else {
           recBase64 = b64;
           document.getElementById('recImage').value = '';
@@ -259,6 +355,12 @@
         document.getElementById('modalPreview').src = '';
         document.getElementById('modalDropPrompt').classList.remove('hidden');
         document.getElementById('modalPreviewContainer').classList.add('hidden');
+      } else if (type === 'edit') {
+        editBase64 = '';
+        document.getElementById('editFileInput').value = '';
+        document.getElementById('editPreview').src = '';
+        document.getElementById('editDropPrompt').classList.remove('hidden');
+        document.getElementById('editPreviewContainer').classList.add('hidden');
       } else {
         recBase64 = '';
         document.getElementById('recFileInput').value = '';
@@ -274,15 +376,28 @@
     }
 
     function switchTab(tab) {
+      currentTab = tab;
       const isOrders = tab === 'orders';
+      const isRecords = tab === 'records';
+      const isAdd = tab === 'addRecord';
+
       document.getElementById('tabOrders').classList.toggle('hidden', !isOrders);
-      document.getElementById('tabRecords').classList.toggle('hidden', isOrders);
+      document.getElementById('tabRecords').classList.toggle('hidden', !isRecords);
+      document.getElementById('tabAddRecord').classList.toggle('hidden', !isAdd);
+
       document.getElementById('navOrders').className = isOrders
         ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition"
         : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition";
-      document.getElementById('navRecords').className = !isOrders
+      document.getElementById('navRecords').className = isRecords
         ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition"
         : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition";
+      document.getElementById('navAddRecord').className = isAdd
+        ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition"
+        : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition";
+
+      if (isRecords && sheetRecords.length === 0) {
+        fetchSheetRecords();
+      }
     }
 
     function detectPlatformFromUrl(url) {
@@ -326,7 +441,7 @@
     }
 
     async function fetchAdminEvents() {
-      document.getElementById('loading').classList.remove('hidden');
+      document.getElementById('loadingOrders').classList.remove('hidden');
       document.getElementById('adminCardList').innerHTML = '';
 
       try {
@@ -340,10 +455,10 @@
             renderPlatformDatalist(data.platforms);
           }
         }
-        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('loadingOrders').classList.add('hidden');
         renderAdminList();
       } catch (e) {
-        document.getElementById('loading').innerHTML = "載入失敗，請確認網路或重新整理。";
+        document.getElementById('loadingOrders').innerHTML = "載入失敗，請確認網路或重新整理。";
       }
     }
 
@@ -448,6 +563,176 @@
       });
     }
 
+    async function fetchSheetRecords() {
+      document.getElementById('loadingRecords').classList.remove('hidden');
+      document.getElementById('recordsCardList').innerHTML = '';
+
+      try {
+        const resp = await fetch(`${GAS_WEB_APP_URL}?action=get_all_records`);
+        const data = await resp.json();
+        sheetRecords = Array.isArray(data.records) ? data.records : [];
+        if (Array.isArray(data.platforms) && data.platforms.length > 0) {
+          renderPlatformDatalist(data.platforms);
+        }
+        document.getElementById('loadingRecords').classList.add('hidden');
+        renderRecordsList();
+      } catch (e) {
+        document.getElementById('loadingRecords').innerHTML = "載入戰績失敗，請重新載入。";
+      }
+    }
+
+    function renderRecordsList() {
+      const search = document.getElementById('recordSearchInput').value.toLowerCase().trim();
+      const sortSelect = document.getElementById('recordSortSelect').value;
+      const listContainer = document.getElementById('recordsCardList');
+      listContainer.innerHTML = '';
+
+      const filtered = sheetRecords.filter(r => {
+        return (r.title || '').toLowerCase().includes(search) ||
+               (r.platform || '').toLowerCase().includes(search) ||
+               (r.saleDate || '').toLowerCase().includes(search) ||
+               (r.countTag || '').toLowerCase().includes(search);
+      });
+
+      filtered.sort((a, b) => {
+        const d1 = (a.saleDate || '').replace(/[\/\-]/g, '.');
+        const d2 = (b.saleDate || '').replace(/[\/\-]/g, '.');
+        return sortSelect === 'desc' ? d2.localeCompare(d1) : d1.localeCompare(d2);
+      });
+
+      if (filtered.length === 0) {
+        listContainer.innerHTML = `<div class="col-span-full text-center py-20 text-slate-400 font-bold">無符合戰績</div>`;
+        return;
+      }
+
+      filtered.forEach((r) => {
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between";
+
+        const tagsHtml = (r.countTag || '').split(' ').filter(t => t.trim()).map(t =>
+          `<span class="px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 font-bold text-[11px] border border-emerald-100">${t}</span>`
+        ).join(' ');
+
+        const imgPreview = r.imageUrl
+          ? `<a href="${r.imageUrl}" target="_blank" class="block mt-2"><img src="${r.imageUrl}" class="w-full h-32 object-cover rounded-xl border border-slate-100"></a>`
+          : '';
+
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+              <span class="text-xs font-black text-emerald-600">${r.saleDate}</span>
+              <span class="text-[11px] font-bold text-slate-400">${r.platform}</span>
+            </div>
+            <h4 class="text-sm font-black text-slate-900 mt-2.5 leading-snug line-clamp-2">${r.title}</h4>
+            <div class="mt-3 flex flex-wrap gap-1.5">${tagsHtml}</div>
+            ${imgPreview}
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-100 flex gap-2">
+            <button onclick='openEditRecordModal(${JSON.stringify(r)})' class="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
+              ✏️ 編輯
+            </button>
+            <button onclick="deleteRecordItem(${r.rowIndex})" class="py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs transition border border-rose-200">
+              🗑️ 刪除
+            </button>
+          </div>
+        `;
+        listContainer.appendChild(card);
+      });
+    }
+
+    function openEditRecordModal(r) {
+      document.getElementById('editRecordRowIndex').value = r.rowIndex;
+      document.getElementById('editRecordDate').value = r.saleDate;
+      document.getElementById('editRecordTitle').value = r.title;
+      document.getElementById('editRecordPlatform').value = r.platform;
+      document.getElementById('editRecordCount').value = r.countTag;
+      document.getElementById('editRecordImage').value = r.imageUrl || '';
+      editBase64 = '';
+      document.getElementById('editFileInput').value = '';
+
+      if (r.imageUrl) {
+        document.getElementById('editPreview').src = r.imageUrl;
+        document.getElementById('editDropPrompt').classList.add('hidden');
+        document.getElementById('editPreviewContainer').classList.remove('hidden');
+      } else {
+        document.getElementById('editPreview').src = '';
+        document.getElementById('editDropPrompt').classList.remove('hidden');
+        document.getElementById('editPreviewContainer').classList.add('hidden');
+      }
+
+      document.getElementById('editRecordModal').classList.add('active');
+    }
+
+    function closeEditRecordModal() {
+      document.getElementById('editRecordModal').classList.remove('active');
+    }
+
+    async function confirmUpdateRecord() {
+      const rowIndex = document.getElementById('editRecordRowIndex').value;
+      const saleDate = document.getElementById('editRecordDate').value.trim();
+      const title = document.getElementById('editRecordTitle').value.trim();
+      const platform = document.getElementById('editRecordPlatform').value.trim();
+      const countTag = document.getElementById('editRecordCount').value.trim();
+      const imageUrl = document.getElementById('editRecordImage').value.trim();
+
+      if (!title || !saleDate || !platform || !countTag) {
+        return alert("請填寫所有必填欄位！");
+      }
+
+      const btn = document.getElementById('btnEditRecordConfirm');
+      btn.disabled = true;
+      btn.innerText = "更新中...";
+
+      try {
+        await fetch(GAS_WEB_APP_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "update_record",
+            rowIndex: rowIndex,
+            saleDate: saleDate,
+            title: title,
+            platform: platform,
+            countTag: countTag,
+            imageUrl: imageUrl,
+            imageBase64: editBase64
+          })
+        });
+
+        alert("戰績修改成功！");
+        closeEditRecordModal();
+        setTimeout(fetchSheetRecords, 1200);
+      } catch (e) {
+        alert("修改失敗：" + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "儲存變更";
+      }
+    }
+
+    async function deleteRecordItem(rowIndex) {
+      if (!confirm("確定要刪除這筆戰績紀錄嗎？試算表中的資料將會直接被刪除。")) return;
+
+      try {
+        await fetch(GAS_WEB_APP_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "delete_record",
+            rowIndex: rowIndex
+          })
+        });
+
+        alert("刪除成功！");
+        setTimeout(fetchSheetRecords, 1200);
+      } catch (e) {
+        alert("刪除失敗：" + e.message);
+      }
+    }
+
     function openPublishModal(idx) {
       const ev = adminEvents[idx];
       if (!ev) return;
@@ -547,6 +832,8 @@
         document.getElementById('recCount').value = '';
         document.getElementById('recImage').value = '';
         clearImage({ stopPropagation: () => {} }, 'rec');
+        switchTab('records');
+        setTimeout(fetchSheetRecords, 1200);
       } catch (e) {
         alert("寫入失敗：" + e.message);
       } finally {
