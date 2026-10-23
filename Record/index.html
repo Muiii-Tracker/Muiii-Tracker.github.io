@@ -249,7 +249,7 @@
             <div class="flex justify-between items-center mb-6 w-full gap-4">
                 <div class="flex items-center gap-4">
                     <div class="relative shrink-0">
-                        <h1 class="text-4xl md:text-6xl font-[800] font-sans tracking-tighter italic text-slate-900 dark:text-white leading-none">MUIII<span class="text-emerald-600">.</span></h1>
+                        <h1 class="text-4xl md:text-6xl font-[800] font-sans tracking-tighter italic text-slate-900 dark:text-white leading-none">Muiii</h1>
                     </div>
                     <div class="h-10 w-px bg-gray-200 dark:bg-slate-700 hidden md:block"></div>
                     <div class="flex flex-col justify-center">
@@ -276,7 +276,7 @@
                     <input type="text" id="searchInput" placeholder="搜尋歌手、場館名稱、售票日期..." class="w-full bg-transparent text-slate-800 dark:text-white py-2 focus:outline-none placeholder-slate-300 dark:placeholder-slate-600 font-bold text-base">
                 </div>
                 <div class="flex flex-wrap lg:flex-nowrap items-center gap-2 w-full lg:w-auto shrink-0 border-t border-gray-50 dark:border-slate-700 lg:border-t-0 pt-2 lg:pt-0 lg:pl-2">
-                    <select id="platform-filter" class="cyber-select font-bold text-slate-500 flex-1 min-w-[120px] lg:flex-none"><option value="all">所有平台</option></select>
+                    <select id="platform-filter" class="cyber-select font-bold text-slate-500 flex-1 min-w-[130px] lg:flex-none"><option value="all">所有平台</option></select>
                     <select id="year-filter" class="cyber-select font-bold text-slate-500 flex-1 min-w-[90px] lg:flex-none"><option value="all">年份</option></select>
                     <select id="month-filter" class="cyber-select font-bold text-slate-500 flex-1 min-w-[90px] lg:flex-none" disabled>
                         <option value="all">月份</option>
@@ -409,10 +409,10 @@
                     complete: function(results) {
                         if (results.data && results.data.length > 0) { 
                             const keys = Object.keys(results.data[0]); 
-                            KEY_DATE = keys.find(k => k.includes('日期') || k.includes('時間')) || KEY_DATE; 
+                            KEY_DATE = keys.find(k => k === '售票日期' || (k.includes('日期') && !k.includes('演出'))) || KEY_DATE; 
                             KEY_TITLE = keys.find(k => k.includes('節目') || k.includes('名稱') || k.includes('活動')) || KEY_TITLE; 
                             KEY_COUNT = keys.find(k => k.includes('張數') || k.includes('數量')) || KEY_COUNT;
-                            KEY_PLATFORM = keys.find(k => k.includes('平台') || k.includes('售票')) || KEY_PLATFORM;
+                            KEY_PLATFORM = keys.find(k => k.includes('平台') || k === '售票平台' || k.includes('網站')) || KEY_PLATFORM;
                             KEY_IMAGE = keys.find(k => k.includes('圖片') || k.includes('截圖') || k.includes('戰報') || k.toLowerCase().includes('proof') || k.toLowerCase().includes('image')) || '圖片';
                         }
                         allRecords = results.data.filter(item => item[KEY_TITLE] && item[KEY_TITLE].trim() !== '');
@@ -548,7 +548,7 @@
         }
 
         function populatePlatforms() {
-            const platforms = [...new Set(allRecords.map(item => (item[KEY_PLATFORM] || '').trim()))].filter(p => p !== '');
+            const platforms = [...new Set(allRecords.map(item => (item[KEY_PLATFORM] || '').trim()))].filter(p => p !== '' && !p.match(/^\d{4}[\.\-\/]/));
             document.getElementById('platform-filter').innerHTML = '<option value="all">所有平台</option>' + platforms.map(p => `<option value="${p}">${p}</option>`).join('');
         }
 
