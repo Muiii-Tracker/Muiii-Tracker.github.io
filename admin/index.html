@@ -22,9 +22,9 @@
           <span class="text-xl font-black italic tracking-tighter text-slate-900">Muiii</span>
           <span class="text-xs font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">管理後台</span>
           <div class="flex bg-slate-100 p-1 rounded-xl gap-1">
-            <button id="navOrders" onclick="switchTab('orders')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition">📋 管理資料</button>
-            <button id="navRecords" onclick="switchTab('records')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition">🏆 戰績管理</button>
-            <button id="navAddRecord" onclick="switchTab('addRecord')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition">➕ 新增戰績</button>
+            <a href="#orders" id="navOrders" class="px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-500 hover:text-slate-900">📋 管理資料</a>
+            <a href="#records" id="navRecords" class="px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-500 hover:text-slate-900">🏆 戰績管理</a>
+            <a href="#add-record" id="navAddRecord" class="px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-500 hover:text-slate-900">➕ 新增戰績</a>
           </div>
         </div>
         <div class="flex items-center gap-2">
@@ -38,7 +38,7 @@
       </div>
     </header>
 
-    <main id="tabOrders" class="container mx-auto px-4 max-w-6xl mt-6">
+    <main id="tabOrders" class="container mx-auto px-4 max-w-6xl mt-6 hidden">
       <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200 mb-6 shadow-sm">
         <div class="relative w-full sm:w-80">
           <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
@@ -76,9 +76,9 @@
             <option value="desc">新到舊</option>
             <option value="asc">舊到新</option>
           </select>
-          <button onclick="switchTab('addRecord')" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-sm whitespace-nowrap">
+          <a href="#add-record" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-sm whitespace-nowrap inline-block">
             ➕ 新增戰績
-          </button>
+          </a>
         </div>
       </div>
 
@@ -255,7 +255,6 @@
 
   <script>
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwbjjKVDfgjqGNmlbK30tfe-7ybMTYNyJ6820IDMM-CSgjIIY4yx8FckBpjzF1sH7Ac/exec";
-    let currentTab = 'orders';
     let adminEvents = [];
     let sheetRecords = [];
     let defaultPlatforms = [
@@ -270,24 +269,65 @@
     let modalBase64 = "";
     let editBase64 = "";
 
+    window.addEventListener('hashchange', applyRouteFromHash);
+
     window.onload = function() {
       renderPlatformDatalist(defaultPlatforms);
-      fetchAdminEvents();
       setupPasteListener();
       const d = new Date();
       const pad = n => String(n).padStart(2, '0');
       document.getElementById('recDate').value = `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())}`;
+      applyRouteFromHash();
     };
+
+    function applyRouteFromHash() {
+      const rawHash = window.location.hash.toLowerCase().replace(/^[#\/]+/, '');
+      let targetRoute = 'orders';
+      if (rawHash === 'records') {
+        targetRoute = 'records';
+      } else if (rawHash === 'add-record') {
+        targetRoute = 'addRecord';
+      }
+
+      renderTabView(targetRoute);
+    }
+
+    function renderTabView(tab) {
+      const isOrders = tab === 'orders';
+      const isRecords = tab === 'records';
+      const isAdd = tab === 'addRecord';
+
+      document.getElementById('tabOrders').classList.toggle('hidden', !isOrders);
+      document.getElementById('tabRecords').classList.toggle('hidden', !isRecords);
+      document.getElementById('tabAddRecord').classList.toggle('hidden', !isAdd);
+
+      document.getElementById('navOrders').className = isOrders
+        ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition"
+        : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition";
+      document.getElementById('navRecords').className = isRecords
+        ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition"
+        : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition";
+      document.getElementById('navAddRecord').className = isAdd
+        ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition"
+        : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition";
+
+      if (isOrders && adminEvents.length === 0) {
+        fetchAdminEvents();
+      } else if (isRecords && sheetRecords.length === 0) {
+        fetchSheetRecords();
+      }
+    }
 
     function triggerFileInput(id) {
       document.getElementById(id).click();
     }
 
     function refreshCurrentTab() {
-      if (currentTab === 'orders') {
-        fetchAdminEvents();
-      } else if (currentTab === 'records') {
+      const rawHash = window.location.hash.toLowerCase().replace(/^[#\/]+/, '');
+      if (rawHash === 'records') {
         fetchSheetRecords();
+      } else {
+        fetchAdminEvents();
       }
     }
 
@@ -373,31 +413,6 @@
     function renderPlatformDatalist(list) {
       const dl = document.getElementById('platformOptions');
       dl.innerHTML = list.map(p => `<option value="${p}">`).join('');
-    }
-
-    function switchTab(tab) {
-      currentTab = tab;
-      const isOrders = tab === 'orders';
-      const isRecords = tab === 'records';
-      const isAdd = tab === 'addRecord';
-
-      document.getElementById('tabOrders').classList.toggle('hidden', !isOrders);
-      document.getElementById('tabRecords').classList.toggle('hidden', !isRecords);
-      document.getElementById('tabAddRecord').classList.toggle('hidden', !isAdd);
-
-      document.getElementById('navOrders').className = isOrders
-        ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition"
-        : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition";
-      document.getElementById('navRecords').className = isRecords
-        ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition"
-        : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition";
-      document.getElementById('navAddRecord').className = isAdd
-        ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition"
-        : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition";
-
-      if (isRecords && sheetRecords.length === 0) {
-        fetchSheetRecords();
-      }
     }
 
     function detectPlatformFromUrl(url) {
@@ -832,7 +847,7 @@
         document.getElementById('recCount').value = '';
         document.getElementById('recImage').value = '';
         clearImage({ stopPropagation: () => {} }, 'rec');
-        switchTab('records');
+        location.hash = '#records';
         setTimeout(fetchSheetRecords, 1200);
       } catch (e) {
         alert("寫入失敗：" + e.message);
