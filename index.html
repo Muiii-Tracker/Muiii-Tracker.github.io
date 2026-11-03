@@ -460,10 +460,12 @@
     const LIFF_ID = "2010930705-qUp1Ao2b";
     let allEvents = [];
     let currentFilter = 'active';
+    let pauseRules = [];
 
     window.addEventListener('hashchange', applyRouteFromHash);
 
     window.onload = async function() {
+      loadPauseSettings();
       try {
         await liff.init({ liffId: LIFF_ID });
         if (!liff.isLoggedIn()) {
@@ -475,6 +477,44 @@
         console.error("初始化失敗：", err);
       }
     };
+
+    async function loadPauseSettings() {
+      try {
+        const res = await fetch(`${GAS_WEB_APP_URL}?action=get_pause_settings`);
+        pauseRules = await res.json();
+      } catch (err) {
+        console.warn("無法取得暫停服務設定：", err);
+      }
+    }
+
+    function checkDateAndAlert(dateVal) {
+      if (!dateVal || !pauseRules || pauseRules.length === 0) return false;
+      const cleanDate = dateVal.trim().replace(/\//g, "-");
+      const toMMDD = dStr => {
+        const p = dStr.split('-');
+        return p.length >= 3 ? `${p[1]}/${p[2]}` : dStr;
+      };
+      const matched = pauseRules.find(r => cleanDate >= r.startDate && cleanDate <= r.endDate);
+      if (matched) {
+        const startMMDD = toMMDD(matched.startDate);
+        const endMMDD = toMMDD(matched.endDate);
+        const rangeText = (matched.startDate === matched.endDate) ? startMMDD : `${startMMDD}~${endMMDD}`;
+        alert(`抱歉 ${rangeText}暫停服務`);
+        return true;
+      }
+      return false;
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      const el = document.getElementById('ticketDate');
+      if (el) {
+        el.addEventListener('change', function(e) {
+          if (checkDateAndAlert(e.target.value)) {
+            e.target.value = '';
+          }
+        });
+      }
+    });
 
     function applyRouteFromHash() {
       const rawHash = window.location.hash.toLowerCase().replace(/^[#\/]+/, '');
@@ -541,6 +581,10 @@
 
       if (!name || !ticketDate || !ticketTime || !ticketLink || !ticketCount || !account || !password) {
         alert("請確保所有【必填欄位】均已正確填寫！");
+        return;
+      }
+
+      if (checkDateAndAlert(ticketDate)) {
         return;
       }
 
