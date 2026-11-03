@@ -25,6 +25,7 @@
             <a href="#orders" id="navOrders" class="px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-500 hover:text-slate-900">📋 管理資料</a>
             <a href="#records" id="navRecords" class="px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-500 hover:text-slate-900">🏆 戰績管理</a>
             <a href="#add-record" id="navAddRecord" class="px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-500 hover:text-slate-900">➕ 新增戰績</a>
+            <a href="#settings" id="navSettings" class="px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-500 hover:text-slate-900">⚙️ 系統設定</a>
           </div>
         </div>
         <div class="flex items-center gap-2">
@@ -38,6 +39,7 @@
       </div>
     </header>
 
+    <!-- 管理資料頁面 -->
     <main id="tabOrders" class="container mx-auto px-4 max-w-6xl mt-6 hidden">
       <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200 mb-6 shadow-sm">
         <div class="relative w-full sm:w-80">
@@ -59,12 +61,13 @@
       </div>
 
       <div id="loadingOrders" class="text-center py-20 text-slate-400 font-bold text-sm">
-        <i class="fas fa-spinner animate-spin text-2xl text-emerald-500 mb-2 block"></i> 資料中載入...
+        <i class="fas fa-spinner animate-spin text-2xl text-emerald-500 mb-2 block"></i> 資料載入中...
       </div>
 
       <div id="adminCardList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
     </main>
 
+    <!-- 戰績管理頁面 -->
     <main id="tabRecords" class="container mx-auto px-4 max-w-6xl mt-6 hidden">
       <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200 mb-6 shadow-sm">
         <div class="relative w-full sm:w-80">
@@ -83,12 +86,13 @@
       </div>
 
       <div id="loadingRecords" class="text-center py-20 text-slate-400 font-bold text-sm">
-        <i class="fas fa-spinner animate-spin text-2xl text-emerald-500 mb-2 block"></i> 資料中載入...
+        <i class="fas fa-spinner animate-spin text-2xl text-emerald-500 mb-2 block"></i> 資料載入中...
       </div>
 
       <div id="recordsCardList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </main>
 
+    <!-- 新增戰績頁面 -->
     <main id="tabAddRecord" class="container mx-auto px-4 max-w-2xl mt-6 hidden">
       <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
         <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
@@ -105,7 +109,7 @@
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-500 mb-1.5">節目名稱 *</label>
-            <input type="text" id="recTitle" placeholder="例如：MAMAMOO 2026 WORLD TOUR ＜4WARD＞ in TAIPEI" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 font-bold text-sm focus:outline-none focus:border-emerald-500">
+            <input type="text" id="recTitle" placeholder="例如：MAMAMOO 2026 WORLD TOUR" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 font-bold text-sm focus:outline-none focus:border-emerald-500">
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -118,72 +122,131 @@
               <input type="text" id="recCount" placeholder="例如：12/05_黃3H區1800*2" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 font-bold text-sm focus:outline-none focus:border-emerald-500">
             </div>
           </div>
+
           <div>
-            <label class="block text-xs font-bold text-slate-500 mb-1.5">戰報截圖</label>
-            <div id="recDropZone" onclick="triggerFileInput('recFileInput')" class="border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-2xl p-4 text-center cursor-pointer transition bg-slate-50 relative group">
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">上傳戰報截圖 (選填)</label>
+            <div onclick="triggerFileInput('recFileInput')" class="border-2 border-dashed border-slate-200 hover:border-emerald-500 rounded-2xl p-4 text-center cursor-pointer transition bg-slate-50 hover:bg-emerald-50/30">
               <input type="file" id="recFileInput" accept="image/*" class="hidden" onchange="handleFileChange(event, 'recPreview', 'recDropPrompt', 'rec')">
-              <div id="recDropPrompt" class="py-3">
-                <i class="fas fa-cloud-arrow-up text-2xl text-slate-400 mb-1 block group-hover:text-emerald-500 transition"></i>
-                <span class="text-xs font-bold text-slate-600 block">點擊上傳，或直接在此按 Ctrl + V 貼上截圖</span>
-                <span class="text-[10px] text-slate-400">支援 PNG、JPG 等圖片</span>
+              <div id="recDropPrompt" class="py-2">
+                <i class="fas fa-cloud-arrow-up text-2xl text-slate-400 mb-1"></i>
+                <p class="text-xs font-bold text-slate-600">點擊上傳或直接 Ctrl+V 貼上截圖</p>
               </div>
-              <div id="recPreviewContainer" class="hidden relative">
-                <img id="recPreview" src="" class="max-h-44 mx-auto rounded-xl shadow-sm object-contain">
-                <button type="button" onclick="clearImage(event, 'rec')" class="absolute top-1 right-1 bg-slate-900/70 hover:bg-slate-900 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs transition">
+              <div id="recPreviewContainer" class="hidden relative inline-block mt-2">
+                <img id="recPreview" src="" class="max-h-40 rounded-xl shadow-sm border border-slate-200">
+                <button type="button" onclick="clearImage(event, 'rec')" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow-md">
                   <i class="fas fa-times"></i>
                 </button>
               </div>
             </div>
             <div class="mt-2">
-              <input type="url" id="recImage" placeholder="或手動填寫圖片網址 https://..." class="w-full px-3 py-2 rounded-xl border border-slate-200 font-medium text-xs focus:outline-none focus:border-emerald-500">
+              <input type="url" id="recImage" placeholder="或填寫圖片網址 https://..." class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium focus:outline-none focus:border-emerald-500">
             </div>
           </div>
 
-          <button id="btnSubmitRecord" onclick="submitNewRecord()" class="w-full py-3.5 mt-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow-lg shadow-emerald-600/20 transition">
+          <button id="btnSubmitRec" onclick="submitNewRecord()" class="w-full mt-4 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-md shadow-emerald-600/20 transition">
             ➕ 新增戰績至試算表
           </button>
         </div>
       </div>
     </main>
+
+    <!-- 系統設定頁面 -->
+    <main id="tabSettings" class="container mx-auto px-4 max-w-4xl mt-6 hidden">
+      <!-- 提示卡片 -->
+      <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 flex items-start gap-3 shadow-sm">
+        <i class="fas fa-bell text-amber-500 text-lg mt-0.5"></i>
+        <div class="text-xs text-amber-800 leading-relaxed">
+          <p class="font-bold mb-0.5">暫停服務與日期比對規則說明：</p>
+          當客戶選擇的「售票日期」落在啟用中的暫停區間內時，系統會自動攔截並提示：<span class="font-black text-amber-900">「抱歉 MM/DD~MM/DD暫停服務」</span>。
+        </div>
+      </div>
+
+      <!-- 新增規則卡片 -->
+      <div class="bg-white rounded-3xl border border-slate-200 p-6 mb-6 shadow-sm">
+        <h2 class="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
+          <span>➕ 新增暫停服務區間</span>
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">開始日期 *</label>
+            <input type="date" id="newPauseStart" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">結束日期 (單日可免填)</label>
+            <input type="date" id="newPauseEnd" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">暫停原因 / 備註</label>
+            <input type="text" id="newPauseReason" placeholder="例如：出國休假、公休" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-500">
+          </div>
+          <div>
+            <button onclick="submitNewPauseRule()" id="btnAddPauseRule" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition">
+              儲存新增
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 設定列表 -->
+      <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-black text-slate-900">📋 目前設定的暫停區間</h2>
+          <button onclick="fetchPauseRulesAdmin()" class="text-xs text-slate-500 hover:text-slate-800 font-bold">
+            <i class="fas fa-rotate"></i> 重新載入
+          </button>
+        </div>
+
+        <div id="loadingPauseRules" class="text-center py-10 text-slate-400 font-bold text-xs">
+          <i class="fas fa-spinner animate-spin text-lg text-emerald-500 mb-1 block"></i> 讀取設定中...
+        </div>
+
+        <div id="pauseRulesList" class="space-y-3"></div>
+      </div>
+    </main>
+
   </div>
 
-  <div id="publishModal" class="modal-bg" onclick="closePublishModal()">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200" onclick="event.stopPropagation()">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-        <h3 class="text-base font-black text-slate-900">🚀 搶票成功</h3>
-        <button onclick="closePublishModal()" class="text-slate-400 hover:text-slate-700"><i class="fas fa-times"></i></button>
+  <!-- 發布戰績彈窗 -->
+  <div id="publishModal" class="modal-bg">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+        <div>
+          <h3 class="font-black text-base text-slate-900">🚀 發布至戰績頁</h3>
+          <p class="text-xs text-slate-400 font-bold">儲存後行程狀態將自動更新為「成功」</p>
+        </div>
+        <button onclick="closePublishModal()" class="text-slate-400 hover:text-slate-600 p-1"><i class="fas fa-times text-sm"></i></button>
       </div>
-      <div class="space-y-3 mt-4 text-xs">
-        <input type="hidden" id="modalEventId">
+      <input type="hidden" id="modalEventId">
+      <div class="space-y-3">
         <div>
-          <label class="font-bold text-slate-500 block mb-1">售票日期</label>
-          <input type="text" id="modalDate" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold">
+          <label class="block text-xs font-bold text-slate-500 mb-1">售票日期</label>
+          <input type="text" id="modalSaleDate" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-500">
         </div>
         <div>
-          <label class="font-bold text-slate-500 block mb-1">節目名稱 *</label>
-          <input type="text" id="modalTitle" placeholder="請輸入演唱會或活動名稱..." class="w-full px-3 py-2 rounded-xl border border-emerald-500 bg-emerald-50/20 font-bold focus:outline-none">
+          <label class="block text-xs font-bold text-slate-500 mb-1">節目名稱 *</label>
+          <input type="text" id="modalTitle" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-500">
         </div>
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="font-bold text-slate-500 block mb-1">售票平台</label>
-            <input type="text" id="modalPlatform" list="platformOptions" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold">
+            <label class="block text-xs font-bold text-slate-500 mb-1">售票平台</label>
+            <input type="text" id="modalPlatform" list="platformOptions" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-500">
           </div>
           <div>
-            <label class="font-bold text-slate-500 block mb-1">張數</label>
-            <input type="text" id="modalCount" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold">
+            <label class="block text-xs font-bold text-slate-500 mb-1">張數 / 標籤</label>
+            <input type="text" id="modalCountTag" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-500">
           </div>
         </div>
         <div>
-          <label class="font-bold text-slate-500 block mb-1">戰報截圖</label>
-          <div id="modalDropZone" onclick="triggerFileInput('modalFileInput')" class="border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-xl p-3 text-center cursor-pointer transition bg-slate-50 relative group">
+          <label class="block text-xs font-bold text-slate-500 mb-1">戰報圖片 (截圖)</label>
+          <div onclick="triggerFileInput('modalFileInput')" class="border-2 border-dashed border-slate-200 hover:border-emerald-500 rounded-xl p-3 text-center cursor-pointer transition bg-slate-50">
             <input type="file" id="modalFileInput" accept="image/*" class="hidden" onchange="handleFileChange(event, 'modalPreview', 'modalDropPrompt', 'modal')">
-            <div id="modalDropPrompt" class="py-2">
-              <i class="fas fa-camera text-xl text-slate-400 mb-1 block group-hover:text-emerald-500 transition"></i>
-              <span class="text-xs font-bold text-slate-600 block">點擊上傳或按 Ctrl + V 貼上截圖</span>
+            <div id="modalDropPrompt" class="py-1">
+              <i class="fas fa-cloud-arrow-up text-lg text-slate-400"></i>
+              <p class="text-xs font-bold text-slate-500">點擊上傳或 Ctrl+V 貼上圖片</p>
             </div>
-            <div id="modalPreviewContainer" class="hidden relative">
-              <img id="modalPreview" src="" class="max-h-36 mx-auto rounded-lg shadow-sm object-contain">
-              <button type="button" onclick="clearImage(event, 'modal')" class="absolute top-1 right-1 bg-slate-900/70 hover:bg-slate-900 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] transition">
+            <div id="modalPreviewContainer" class="hidden relative inline-block mt-1">
+              <img id="modalPreview" src="" class="max-h-32 rounded-lg border border-slate-200">
+              <button type="button" onclick="clearImage(event, 'modal')" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
                 <i class="fas fa-times"></i>
               </button>
             </div>
@@ -195,48 +258,52 @@
       </div>
       <div class="mt-5 flex gap-2">
         <button onclick="closePublishModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 font-bold text-xs text-slate-600">取消</button>
-        <button id="btnModalConfirm" onclick="confirmPublishAndSuccess()" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20">確認發布</button>
+        <button id="btnPublishConfirm" onclick="confirmPublishRecord()" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20">發布並標記成功</button>
       </div>
     </div>
   </div>
 
-  <div id="editRecordModal" class="modal-bg" onclick="closeEditRecordModal()">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200" onclick="event.stopPropagation()">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-        <h3 class="text-base font-black text-slate-900">✏️ 修改戰績資料</h3>
-        <button onclick="closeEditRecordModal()" class="text-slate-400 hover:text-slate-700"><i class="fas fa-times"></i></button>
+  <!-- 編輯戰績彈窗 -->
+  <div id="editRecordModal" class="modal-bg">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+        <div>
+          <h3 class="font-black text-base text-slate-900">✏️ 編輯戰績資料</h3>
+          <p class="text-xs text-slate-400 font-bold">更新試算表第 <span id="editRowDisplay" class="text-emerald-600 font-bold"></span> 列紀錄</p>
+        </div>
+        <button onclick="closeEditRecordModal()" class="text-slate-400 hover:text-slate-600 p-1"><i class="fas fa-times text-sm"></i></button>
       </div>
-      <div class="space-y-3 mt-4 text-xs">
-        <input type="hidden" id="editRecordRowIndex">
+      <input type="hidden" id="editRowIndex">
+      <div class="space-y-3">
         <div>
-          <label class="font-bold text-slate-500 block mb-1">售票日期 *</label>
-          <input type="text" id="editRecordDate" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold">
+          <label class="block text-xs font-bold text-slate-500 mb-1">售票日期</label>
+          <input type="text" id="editRecordSaleDate" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-500">
         </div>
         <div>
-          <label class="font-bold text-slate-500 block mb-1">節目名稱 *</label>
-          <input type="text" id="editRecordTitle" class="w-full px-3 py-2 rounded-xl border border-emerald-500 bg-emerald-50/20 font-bold focus:outline-none">
+          <label class="block text-xs font-bold text-slate-500 mb-1">節目名稱 *</label>
+          <input type="text" id="editRecordTitle" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-500">
         </div>
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="font-bold text-slate-500 block mb-1">售票平台 *</label>
-            <input type="text" id="editRecordPlatform" list="platformOptions" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold">
+            <label class="block text-xs font-bold text-slate-500 mb-1">售票平台</label>
+            <input type="text" id="editRecordPlatform" list="platformOptions" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-500">
           </div>
           <div>
-            <label class="font-bold text-slate-500 block mb-1">張數 *</label>
-            <input type="text" id="editRecordCount" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold">
+            <label class="block text-xs font-bold text-slate-500 mb-1">張數 / 標籤</label>
+            <input type="text" id="editRecordCountTag" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-500">
           </div>
         </div>
         <div>
-          <label class="font-bold text-slate-500 block mb-1">戰報截圖</label>
-          <div id="editDropZone" onclick="triggerFileInput('editFileInput')" class="border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-xl p-3 text-center cursor-pointer transition bg-slate-50 relative group">
+          <label class="block text-xs font-bold text-slate-500 mb-1">戰報圖片</label>
+          <div onclick="triggerFileInput('editFileInput')" class="border-2 border-dashed border-slate-200 hover:border-emerald-500 rounded-xl p-3 text-center cursor-pointer transition bg-slate-50">
             <input type="file" id="editFileInput" accept="image/*" class="hidden" onchange="handleFileChange(event, 'editPreview', 'editDropPrompt', 'edit')">
-            <div id="editDropPrompt" class="py-2">
-              <i class="fas fa-camera text-xl text-slate-400 mb-1 block group-hover:text-emerald-500 transition"></i>
-              <span class="text-xs font-bold text-slate-600 block">點擊更換或按 Ctrl + V 貼上新截圖</span>
+            <div id="editDropPrompt" class="py-1">
+              <i class="fas fa-cloud-arrow-up text-lg text-slate-400"></i>
+              <p class="text-xs font-bold text-slate-500">點擊上傳或 Ctrl+V 貼上圖片</p>
             </div>
-            <div id="editPreviewContainer" class="hidden relative">
-              <img id="editPreview" src="" class="max-h-36 mx-auto rounded-lg shadow-sm object-contain">
-              <button type="button" onclick="clearImage(event, 'edit')" class="absolute top-1 right-1 bg-slate-900/70 hover:bg-slate-900 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] transition">
+            <div id="editPreviewContainer" class="hidden relative inline-block mt-1">
+              <img id="editPreview" src="" class="max-h-32 rounded-lg border border-slate-200">
+              <button type="button" onclick="clearImage(event, 'edit')" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
                 <i class="fas fa-times"></i>
               </button>
             </div>
@@ -257,6 +324,7 @@
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwbjjKVDfgjqGNmlbK30tfe-7ybMTYNyJ6820IDMM-CSgjIIY4yx8FckBpjzF1sH7Ac/exec";
     let adminEvents = [];
     let sheetRecords = [];
+    let pauseRulesAdmin = [];
     let defaultPlatforms = [
       "Tixcraft 拓元售票", "添翼 Teamear", "Indievox 獨立音樂", "KKTIX", "iBon",
       "FamiTicket 全網", "Kham 寬宏售票", "Ticket.com.tw 年代", "UDN售票網",
@@ -283,11 +351,9 @@
     function applyRouteFromHash() {
       const rawHash = window.location.hash.toLowerCase().replace(/^[#\/]+/, '');
       let targetRoute = 'orders';
-      if (rawHash === 'records') {
-        targetRoute = 'records';
-      } else if (rawHash === 'add-record') {
-        targetRoute = 'addRecord';
-      }
+      if (rawHash === 'records') targetRoute = 'records';
+      else if (rawHash === 'add-record') targetRoute = 'addRecord';
+      else if (rawHash === 'settings') targetRoute = 'settings';
 
       renderTabView(targetRoute);
     }
@@ -296,26 +362,21 @@
       const isOrders = tab === 'orders';
       const isRecords = tab === 'records';
       const isAdd = tab === 'addRecord';
+      const isSettings = tab === 'settings';
 
       document.getElementById('tabOrders').classList.toggle('hidden', !isOrders);
       document.getElementById('tabRecords').classList.toggle('hidden', !isRecords);
       document.getElementById('tabAddRecord').classList.toggle('hidden', !isAdd);
+      document.getElementById('tabSettings').classList.toggle('hidden', !isSettings);
 
-      document.getElementById('navOrders').className = isOrders
-        ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition"
-        : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition";
-      document.getElementById('navRecords').className = isRecords
-        ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition"
-        : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition";
-      document.getElementById('navAddRecord').className = isAdd
-        ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition"
-        : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition";
+      document.getElementById('navOrders').className = isOrders ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition" : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition";
+      document.getElementById('navRecords').className = isRecords ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition" : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition";
+      document.getElementById('navAddRecord').className = isAdd ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition" : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition";
+      document.getElementById('navSettings').className = isSettings ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition" : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition";
 
-      if (isOrders && adminEvents.length === 0) {
-        fetchAdminEvents();
-      } else if (isRecords && sheetRecords.length === 0) {
-        fetchSheetRecords();
-      }
+      if (isOrders && adminEvents.length === 0) fetchAdminEvents();
+      else if (isRecords && sheetRecords.length === 0) fetchSheetRecords();
+      else if (isSettings) fetchPauseRulesAdmin();
     }
 
     function triggerFileInput(id) {
@@ -324,11 +385,9 @@
 
     function refreshCurrentTab() {
       const rawHash = window.location.hash.toLowerCase().replace(/^[#\/]+/, '');
-      if (rawHash === 'records') {
-        fetchSheetRecords();
-      } else {
-        fetchAdminEvents();
-      }
+      if (rawHash === 'records') fetchSheetRecords();
+      else if (rawHash === 'settings') fetchPauseRulesAdmin();
+      else fetchAdminEvents();
     }
 
     function setupPasteListener() {
@@ -355,9 +414,7 @@
 
     function handleFileChange(event, previewId, promptId, type) {
       const file = event.target.files[0];
-      if (file) {
-        processImageFile(file, previewId, promptId, type);
-      }
+      if (file) processImageFile(file, previewId, promptId, type);
     }
 
     function processImageFile(file, previewId, promptId, type) {
@@ -410,272 +467,338 @@
       }
     }
 
-    function renderPlatformDatalist(list) {
+    function renderPlatformDatalist(platforms) {
       const dl = document.getElementById('platformOptions');
-      dl.innerHTML = list.map(p => `<option value="${p}">`).join('');
+      if (!dl) return;
+      dl.innerHTML = (platforms || []).map(p => `<option value="${p}">`).join('');
     }
 
-    function detectPlatformFromUrl(url) {
-      const u = (url || '').toLowerCase();
-      if (u.includes('tixcraft')) return 'Tixcraft 拓元售票';
-      if (u.includes('teamear')) return '添翼 Teamear';
-      if (u.includes('indievox')) return 'Indievox 獨立音樂';
-      if (u.includes('kktix')) return 'KKTIX';
-      if (u.includes('ibon')) return 'iBon';
-      if (u.includes('fami')) return 'FamiTicket 全網';
-      if (u.includes('kham')) return 'Kham 寬宏售票';
-      if (u.includes('ticket.com.tw')) return 'Ticket.com.tw 年代';
-      if (u.includes('udnfunlife')) return 'UDN售票網';
-      if (u.includes('ticketplus')) return 'TicketPlus 遠大';
-      if (u.includes('funone')) return 'FunOne Tickets';
-      if (u.includes('fansi')) return 'FANSI GO';
-      if (u.includes('urbtix')) return 'Urbtix 城市';
-      if (u.includes('cityline')) return 'Cityline 買飛';
-      if (u.includes('hkticketing')) return 'HKTicketing 快達票';
-      if (u.includes('galaxymacau')) return '澳門銀河';
-      if (u.includes('ticketmaster')) return 'TicketMaster Singapore';
-      if (u.includes('ticketek')) return 'Ticketek Australia';
-      if (u.includes('klook')) return 'KLOOK';
-      return 'Tixcraft 拓元售票';
+    // ==================== 系統設定模組 JS ====================
+
+    async function fetchPauseRulesAdmin() {
+      document.getElementById('loadingPauseRules').style.display = 'block';
+      document.getElementById('pauseRulesList').innerHTML = '';
+      try {
+        const resp = await fetch(`${GAS_WEB_APP_URL}?action=get_all_pause_rules`);
+        pauseRulesAdmin = await resp.json();
+        renderPauseRulesList();
+      } catch (err) {
+        document.getElementById('pauseRulesList').innerHTML = '<p class="text-xs text-red-500 font-bold">載入失敗，請確認 GAS 是否已發布最新版本。</p>';
+      } finally {
+        document.getElementById('loadingPauseRules').style.display = 'none';
+      }
     }
 
-    function buildFormattedCountTag(ev) {
-      let datePrefix = "";
-      if (ev.eventDate && ev.eventDate !== "未指定") {
-        const parts = ev.eventDate.split(/[-/.]/);
-        if (parts.length >= 3) {
-          datePrefix = `${parts[1].padStart(2, '0')}/${parts[2].padStart(2, '0')}_`;
-        }
+    function renderPauseRulesList() {
+      const container = document.getElementById('pauseRulesList');
+      if (pauseRulesAdmin.length === 0) {
+        container.innerHTML = '<p class="text-xs text-slate-400 font-bold py-4 text-center">目前沒有任何暫停服務設定</p>';
+        return;
       }
-      const areaStr = (ev.ticketArea && ev.ticketArea !== "未指定") ? ev.ticketArea.replace(/\s+/g, '') : "";
-      const cnt = ev.ticketCount || 1;
-      if (datePrefix || areaStr) {
-        return `${datePrefix}${areaStr}*${cnt}`;
-      }
-      return `${cnt}張`;
+
+      const toMMDD = dStr => {
+        const p = dStr.split('-');
+        return p.length >= 3 ? `${p[1]}/${p[2]}` : dStr;
+      };
+
+      container.innerHTML = pauseRulesAdmin.map(rule => {
+        const rangeText = (rule.startDate === rule.endDate) 
+          ? toMMDD(rule.startDate) 
+          : `${toMMDD(rule.startDate)}~${toMMDD(rule.endDate)}`;
+        
+        return `
+          <div class="flex items-center justify-between p-3.5 rounded-2xl border ${rule.enabled ? 'border-slate-200 bg-white' : 'border-slate-100 bg-slate-50 opacity-70'}">
+            <div class="flex items-center gap-3">
+              <span class="px-2.5 py-1 rounded-full text-xs font-extrabold ${rule.enabled ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-200 text-slate-600'}">
+                ${rule.enabled ? '啟用中' : '已停用'}
+              </span>
+              <div>
+                <div class="text-sm font-black text-slate-900">${rule.startDate} 至 ${rule.endDate} <span class="text-xs text-slate-500 font-bold">(${rangeText})</span></div>
+                <div class="text-xs text-slate-500 font-medium">原因：${rule.reason}</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="togglePauseRule(${rule.rowIndex}, ${!rule.enabled})" class="px-3 py-1.5 rounded-lg text-xs font-bold border transition ${rule.enabled ? 'border-amber-200 text-amber-700 bg-amber-50 hover:bg-amber-100' : 'border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100'}">
+                ${rule.enabled ? '停用' : '啟用'}
+              </button>
+              <button onclick="deletePauseRule(${rule.rowIndex})" class="px-3 py-1.5 rounded-lg text-xs font-bold border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 transition">
+                刪除
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
+
+    async function submitNewPauseRule() {
+      const startDate = document.getElementById('newPauseStart').value;
+      const endDate = document.getElementById('newPauseEnd').value || startDate;
+      const reason = document.getElementById('newPauseReason').value.trim() || "暫停服務";
+
+      if (!startDate) return alert("請選擇開始日期！");
+      if (startDate > endDate) return alert("結束日期不可早於開始日期！");
+
+      const btn = document.getElementById('btnAddPauseRule');
+      btn.disabled = true;
+      btn.innerText = "儲存中...";
+
+      try {
+        await fetch(GAS_WEB_APP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "add_pause_rule",
+            startDate: startDate,
+            endDate: endDate,
+            reason: reason,
+            enabled: true
+          })
+        });
+
+        alert("新增成功！");
+        document.getElementById('newPauseStart').value = '';
+        document.getElementById('newPauseEnd').value = '';
+        document.getElementById('newPauseReason').value = '';
+        fetchPauseRulesAdmin();
+      } catch (e) {
+        alert("新增失敗：" + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "儲存新增";
+      }
+    }
+
+    async function togglePauseRule(rowIndex, newStatus) {
+      try {
+        await fetch(GAS_WEB_APP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "toggle_pause_rule", rowIndex: rowIndex, enabled: newStatus })
+        });
+        fetchPauseRulesAdmin();
+      } catch (e) {
+        alert("更新失敗：" + e.message);
+      }
+    }
+
+    async function deletePauseRule(rowIndex) {
+      if (!confirm("確定要刪除這筆暫停服務設定嗎？")) return;
+      try {
+        await fetch(GAS_WEB_APP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "delete_pause_rule", rowIndex: rowIndex })
+        });
+        fetchPauseRulesAdmin();
+      } catch (e) {
+        alert("刪除失敗：" + e.message);
+      }
+    }
+
+    // ==================== 訂單管理與戰績管理 JS ====================
 
     async function fetchAdminEvents() {
-      document.getElementById('loadingOrders').classList.remove('hidden');
+      document.getElementById('loadingOrders').style.display = 'block';
       document.getElementById('adminCardList').innerHTML = '';
-
       try {
         const resp = await fetch(`${GAS_WEB_APP_URL}?action=get_all_events_admin`);
         const data = await resp.json();
-        if (Array.isArray(data)) {
-          adminEvents = data;
-        } else {
-          adminEvents = Array.isArray(data.events) ? data.events : [];
-          if (Array.isArray(data.platforms) && data.platforms.length > 0) {
-            renderPlatformDatalist(data.platforms);
-          }
-        }
-        document.getElementById('loadingOrders').classList.add('hidden');
+        adminEvents = data.events || [];
+        if (data.platforms && data.platforms.length > 0) renderPlatformDatalist(data.platforms);
         renderAdminList();
-      } catch (e) {
-        document.getElementById('loadingOrders').innerHTML = "載入失敗，請確認網路或重新整理。";
+      } catch (err) {
+        document.getElementById('adminCardList').innerHTML = '<p class="text-center col-span-2 text-xs text-red-500 font-bold">載入失敗</p>';
+      } finally {
+        document.getElementById('loadingOrders').style.display = 'none';
       }
     }
 
     function renderAdminList() {
-      const search = document.getElementById('adminSearchInput').value.toLowerCase().trim();
-      const statusSelect = document.getElementById('statusFilter').value;
-      const sortSelect = document.getElementById('sortSelect').value;
       const listContainer = document.getElementById('adminCardList');
-      listContainer.innerHTML = '';
+      const search = document.getElementById('adminSearchInput').value.trim().toLowerCase();
+      const statusSelect = document.getElementById('statusFilter').value;
+      const sort = document.getElementById('sortSelect').value;
 
-      const filtered = adminEvents.filter(ev => {
-        const matchText = ((ev.name || '') + (ev.account || '') + (ev.ticketDate || '') + (ev.ticketTime || '')).toLowerCase().includes(search);
-        const s = (ev.status || '').trim();
+      let filtered = adminEvents.filter(ev => {
+        const fullStr = `${ev.name} ${ev.account} ${ev.ticketDate} ${ev.ticketTime} ${ev.ticketArea}`.toLowerCase();
+        const matchSearch = !search || fullStr.includes(search);
+
         let matchStatus = true;
+        const s = (ev.status || '').trim();
         if (statusSelect === 'success') matchStatus = s === '成功' || s === '搶票成功';
         else if (statusSelect === 'failed') matchStatus = s === '失敗' || s === '未搶到';
         else if (statusSelect === 'pending') matchStatus = !s || (s !== '成功' && s !== '失敗');
-        return matchText && matchStatus;
+
+        return matchSearch && matchStatus;
       });
 
       filtered.sort((a, b) => {
-        const t1 = `${a.ticketDate || ''} ${a.ticketTime || ''}`.trim();
-        const t2 = `${b.ticketDate || ''} ${b.ticketTime || ''}`.trim();
-        return sortSelect === 'desc' ? t2.localeCompare(t1) : t1.localeCompare(t2);
+        const timeA = new Date(`${a.ticketDate}T${a.ticketTime}:00`).getTime();
+        const timeB = new Date(`${b.ticketDate}T${b.ticketTime}:00`).getTime();
+        return sort === 'asc' ? timeA - timeB : timeB - timeA;
       });
 
       if (filtered.length === 0) {
-        listContainer.innerHTML = `<div class="col-span-full text-center py-20 text-slate-400 font-bold">無符合資料</div>`;
+        listContainer.innerHTML = '<div class="col-span-full py-16 text-center text-slate-400 font-bold text-xs">沒有找到符合條件的登記資料</div>';
         return;
       }
 
-      filtered.forEach((ev) => {
-        const card = document.createElement('div');
-        card.className = "bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between";
-
+      listContainer.innerHTML = filtered.map(ev => {
         const s = (ev.status || '').trim();
-        const isHandled = (s === '成功' || s === '搶票成功' || s === '失敗' || s === '未搶到');
-
-        let statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">⌛ 處理中</span>`;
-        if (s === '成功' || s === '搶票成功') {
-          statusBadge = `
-            <div class="flex items-center gap-1.5">
-              <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">🎉 搶票成功</span>
-              <button onclick="updateEventStatus('${ev.id}', '')" title="重設為待處理" class="text-slate-400 hover:text-slate-600 text-xs px-1.5 py-0.5 rounded hover:bg-slate-100 transition"><i class="fas fa-undo"></i></button>
-            </div>
-          `;
-        } else if (s === '失敗' || s === '未搶到') {
-          statusBadge = `
-            <div class="flex items-center gap-1.5">
-              <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">❌ 搶票失敗</span>
-              <button onclick="updateEventStatus('${ev.id}', '')" title="重設為待處理" class="text-slate-400 hover:text-slate-600 text-xs px-1.5 py-0.5 rounded hover:bg-slate-100 transition"><i class="fas fa-undo"></i></button>
-            </div>
-          `;
+        const isHandled = s === '成功' || s === '失敗';
+        let statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">處理中</span>`;
+        if (s === '成功') {
+          statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">🎉 搶票成功</span>`;
+        } else if (s === '失敗') {
+          statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-red-50 text-red-600 border border-red-200">❌ 搶票失敗</span>`;
         }
 
-        const realIndex = adminEvents.findIndex(item => item.id === ev.id);
-
         const actionButtonsHtml = isHandled ? '' : `
-          <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap gap-2">
-            <button onclick="openPublishModal(${realIndex})" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-sm">
-              🚀 搶票成功
+          <div class="flex items-center gap-2 mt-4 pt-3 border-t border-slate-100">
+            <button onclick='openPublishModal(${JSON.stringify(ev)})' class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition">
+              🚀 成功並發布戰績
             </button>
-            <button onclick="updateEventStatus('${ev.id}', '失敗')" class="flex-1 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs transition border border-rose-200">
-              ❌ 搶票失敗
+            <button onclick="updateEventStatus('${ev.id}', '失敗')" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 font-bold text-xs transition">
+              標記失敗
             </button>
           </div>
         `;
 
-        card.innerHTML = `
-          <div>
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-              <span class="text-lg font-black text-slate-900">${ev.name}</span>
+        return `
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:border-slate-300 transition">
+            <div class="flex items-start justify-between gap-2 mb-3">
+              <div>
+                <h3 class="font-extrabold text-base text-slate-900">${ev.name}</h3>
+                <p class="text-xs text-slate-500 font-bold mt-0.5">售票時間：<span class="text-emerald-700">${ev.ticketDate} ${ev.ticketTime}</span></p>
+              </div>
               ${statusBadge}
             </div>
 
-            <div class="mt-3 space-y-2 text-xs font-medium text-slate-600">
-              <div class="flex justify-between"><span class="text-slate-400 font-bold">⏰ 售票時間</span><span class="font-bold text-slate-800">${ev.ticketDate} ${ev.ticketTime}</span></div>
-              <div class="flex justify-between"><span class="text-slate-400 font-bold">🎫 訂購張數</span><span class="font-bold text-emerald-600">${ev.ticketCount || 1} 張</span></div>
-              <div class="flex justify-between"><span class="text-slate-400 font-bold">💺 區域/演出</span><span>${ev.ticketArea} / ${ev.eventDate}</span></div>
-              <div class="flex justify-between"><span class="text-slate-400 font-bold">💳 優先代碼</span><span>${ev.priorityCode || '無'}</span></div>
-
-              <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 mt-2 space-y-1">
-                <div class="flex items-center justify-between">
-                  <span class="font-mono text-slate-500 font-bold">🔑 ${ev.account}</span>
-                  <button onclick="copyText('${ev.account}')" class="text-emerald-600 hover:text-emerald-700 font-bold text-[11px]">複製帳號</button>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="font-mono text-slate-500 font-bold">🔒 ${ev.password}</span>
-                  <button onclick="copyText('${ev.password}')" class="text-emerald-600 hover:text-emerald-700 font-bold text-[11px]">複製密碼</button>
-                </div>
-              </div>
-
-              <div class="pt-1">
-                <a href="${ev.ticketLink}" target="_blank" rel="noopener" class="text-blue-500 hover:underline truncate block text-[11px]"><i class="fas fa-link mr-1"></i>${ev.ticketLink}</a>
-              </div>
+            <div class="bg-slate-50 rounded-xl p-3 text-xs space-y-1.5 font-medium text-slate-600 mb-2">
+              <div class="flex justify-between"><span class="text-slate-400">張數：</span><span class="font-bold text-slate-800">${ev.ticketCount}</span></div>
+              <div class="flex justify-between items-center"><span class="text-slate-400">帳號：</span><span class="font-mono font-bold text-slate-800">${ev.account} <i onclick="copyText('${ev.account}')" class="fas fa-copy ml-1 cursor-pointer text-slate-400 hover:text-emerald-600"></i></span></div>
+              <div class="flex justify-between items-center"><span class="text-slate-400">密碼：</span><span class="font-mono font-bold text-slate-800">${ev.password} <i onclick="copyText('${ev.password}')" class="fas fa-copy ml-1 cursor-pointer text-slate-400 hover:text-emerald-600"></i></span></div>
+              <div class="flex justify-between"><span class="text-slate-400">區域：</span><span class="font-bold text-slate-800">${ev.ticketArea}</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">演出日期：</span><span class="font-bold text-slate-800">${ev.eventDate}</span></div>
+              ${ev.ticketLink ? `<div class="pt-1"><a href="${ev.ticketLink}" target="_blank" class="text-emerald-600 hover:underline flex items-center gap-1 font-bold"><i class="fas fa-link"></i> 前往售票網址</a></div>` : ''}
             </div>
-          </div>
 
-          ${actionButtonsHtml}
+            ${actionButtonsHtml}
+          </div>
         `;
-        listContainer.appendChild(card);
-      });
+      }).join('');
     }
 
     async function fetchSheetRecords() {
-      document.getElementById('loadingRecords').classList.remove('hidden');
+      document.getElementById('loadingRecords').style.display = 'block';
       document.getElementById('recordsCardList').innerHTML = '';
-
       try {
         const resp = await fetch(`${GAS_WEB_APP_URL}?action=get_all_records`);
         const data = await resp.json();
-        sheetRecords = Array.isArray(data.records) ? data.records : [];
-        if (Array.isArray(data.platforms) && data.platforms.length > 0) {
-          renderPlatformDatalist(data.platforms);
-        }
-        document.getElementById('loadingRecords').classList.add('hidden');
+        sheetRecords = data.records || [];
         renderRecordsList();
-      } catch (e) {
-        document.getElementById('loadingRecords').innerHTML = "載入戰績失敗，請重新載入。";
+      } catch (err) {
+        document.getElementById('recordsCardList').innerHTML = '<p class="text-center col-span-3 text-xs text-red-500 font-bold">戰績載入失敗</p>';
+      } finally {
+        document.getElementById('loadingRecords').style.display = 'none';
       }
     }
 
     function renderRecordsList() {
-      const search = document.getElementById('recordSearchInput').value.toLowerCase().trim();
-      const sortSelect = document.getElementById('recordSortSelect').value;
-      const listContainer = document.getElementById('recordsCardList');
-      listContainer.innerHTML = '';
+      const container = document.getElementById('recordsCardList');
+      const search = document.getElementById('recordSearchInput').value.trim().toLowerCase();
+      const sort = document.getElementById('recordSortSelect').value;
 
-      const filtered = sheetRecords.filter(r => {
-        return (r.title || '').toLowerCase().includes(search) ||
-               (r.platform || '').toLowerCase().includes(search) ||
-               (r.saleDate || '').toLowerCase().includes(search) ||
-               (r.countTag || '').toLowerCase().includes(search);
+      let filtered = sheetRecords.filter(rec => {
+        const full = `${rec.title} ${rec.platform} ${rec.saleDate} ${rec.countTag}`.toLowerCase();
+        return !search || full.includes(search);
       });
 
-      filtered.sort((a, b) => {
-        const d1 = (a.saleDate || '').replace(/[\/\-]/g, '.');
-        const d2 = (b.saleDate || '').replace(/[\/\-]/g, '.');
-        return sortSelect === 'desc' ? d2.localeCompare(d1) : d1.localeCompare(d2);
-      });
+      if (sort === 'asc') filtered.reverse();
 
       if (filtered.length === 0) {
-        listContainer.innerHTML = `<div class="col-span-full text-center py-20 text-slate-400 font-bold">無符合戰績</div>`;
+        container.innerHTML = '<div class="col-span-full py-16 text-center text-slate-400 font-bold text-xs">沒有找到任何戰績</div>';
         return;
       }
 
-      filtered.forEach((r) => {
-        const card = document.createElement('div');
-        card.className = "bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between";
-
-        const tagsHtml = (r.countTag || '').split(' ').filter(t => t.trim()).map(t =>
-          `<span class="px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 font-bold text-[11px] border border-emerald-100">${t}</span>`
-        ).join(' ');
-
-        const imgPreview = r.imageUrl
-          ? `<a href="${r.imageUrl}" target="_blank" class="block mt-2"><img src="${r.imageUrl}" class="w-full h-32 object-cover rounded-xl border border-slate-100"></a>`
-          : '';
-
-        card.innerHTML = `
+      container.innerHTML = filtered.map(rec => `
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm flex flex-col justify-between">
           <div>
-            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-              <span class="text-xs font-black text-emerald-600">${r.saleDate}</span>
-              <span class="text-[11px] font-bold text-slate-400">${r.platform}</span>
+            ${rec.imageUrl ? `<div class="h-44 bg-slate-100 overflow-hidden"><img src="${rec.imageUrl}" class="w-full h-full object-cover"></div>` : `<div class="h-28 bg-slate-50 flex items-center justify-center text-slate-300 font-bold text-xs">無戰報截圖</div>`}
+            <div class="p-4">
+              <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md inline-block mb-1.5">${rec.platform}</span>
+              <h4 class="font-extrabold text-sm text-slate-900 leading-snug line-clamp-2">${rec.title}</h4>
+              <p class="text-xs text-slate-400 font-bold mt-2">售票：${rec.saleDate}</p>
+              <p class="text-xs text-slate-600 font-bold mt-0.5">規格：${rec.countTag}</p>
             </div>
-            <h4 class="text-sm font-black text-slate-900 mt-2.5 leading-snug line-clamp-2">${r.title}</h4>
-            <div class="mt-3 flex flex-wrap gap-1.5">${tagsHtml}</div>
-            ${imgPreview}
           </div>
-
-          <div class="mt-4 pt-3 border-t border-slate-100 flex gap-2">
-            <button onclick='openEditRecordModal(${JSON.stringify(r)})' class="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
-              ✏️ 編輯
-            </button>
-            <button onclick="deleteRecordItem(${r.rowIndex})" class="py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs transition border border-rose-200">
-              🗑️ 刪除
-            </button>
+          <div class="p-4 pt-0 flex gap-2">
+            <button onclick='openEditRecordModal(${JSON.stringify(rec)})' class="flex-1 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50">編輯</button>
+            <button onclick="deleteRecord(${rec.rowIndex})" class="px-3 py-1.5 rounded-xl border border-red-200 text-xs font-bold text-red-600 hover:bg-red-50">刪除</button>
           </div>
-        `;
-        listContainer.appendChild(card);
-      });
+        </div>
+      `).join('');
     }
 
-    function openEditRecordModal(r) {
-      document.getElementById('editRecordRowIndex').value = r.rowIndex;
-      document.getElementById('editRecordDate').value = r.saleDate;
-      document.getElementById('editRecordTitle').value = r.title;
-      document.getElementById('editRecordPlatform').value = r.platform;
-      document.getElementById('editRecordCount').value = r.countTag;
-      document.getElementById('editRecordImage').value = r.imageUrl || '';
-      editBase64 = '';
-      document.getElementById('editFileInput').value = '';
+    function openPublishModal(ev) {
+      document.getElementById('modalEventId').value = ev.id;
+      document.getElementById('modalSaleDate').value = ev.ticketDate || '';
+      document.getElementById('modalTitle').value = ev.name || '';
+      document.getElementById('modalPlatform').value = '';
+      document.getElementById('modalCountTag').value = ev.ticketCount ? `${ev.ticketCount}張` : '';
+      clearImage({ stopPropagation: () => {} }, 'modal');
+      document.getElementById('publishModal').classList.add('active');
+    }
 
-      if (r.imageUrl) {
-        document.getElementById('editPreview').src = r.imageUrl;
-        document.getElementById('editDropPrompt').classList.add('hidden');
-        document.getElementById('editPreviewContainer').classList.remove('hidden');
-      } else {
-        document.getElementById('editPreview').src = '';
-        document.getElementById('editDropPrompt').classList.remove('hidden');
-        document.getElementById('editPreviewContainer').classList.add('hidden');
+    function closePublishModal() {
+      document.getElementById('publishModal').classList.remove('active');
+    }
+
+    async function confirmPublishRecord() {
+      const eventId = document.getElementById('modalEventId').value;
+      const title = document.getElementById('modalTitle').value.trim();
+      if (!title) return alert("請填寫節目名稱！");
+
+      const btn = document.getElementById('btnPublishConfirm');
+      btn.disabled = true;
+      btn.innerText = "發布中...";
+
+      try {
+        await fetch(GAS_WEB_APP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "publish_and_mark_success",
+            eventId: eventId,
+            saleDate: document.getElementById('modalSaleDate').value.trim(),
+            title: title,
+            platform: document.getElementById('modalPlatform').value.trim(),
+            countTag: document.getElementById('modalCountTag').value.trim(),
+            imageUrl: document.getElementById('modalImage').value.trim(),
+            imageBase64: modalBase64
+          })
+        });
+
+        alert("發布成功並標記為搶票成功！");
+        closePublishModal();
+        fetchAdminEvents();
+      } catch (e) {
+        alert("發布失敗：" + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "發布並標記成功";
       }
+    }
 
+    function openEditRecordModal(rec) {
+      document.getElementById('editRowIndex').value = rec.rowIndex;
+      document.getElementById('editRowDisplay').innerText = rec.rowIndex;
+      document.getElementById('editRecordSaleDate').value = rec.saleDate || '';
+      document.getElementById('editRecordTitle').value = rec.title || '';
+      document.getElementById('editRecordPlatform').value = rec.platform || '';
+      document.getElementById('editRecordCountTag').value = rec.countTag || '';
+      document.getElementById('editRecordImage').value = rec.imageUrl || '';
+      clearImage({ stopPropagation: () => {} }, 'edit');
       document.getElementById('editRecordModal').classList.add('active');
     }
 
@@ -684,160 +807,74 @@
     }
 
     async function confirmUpdateRecord() {
-      const rowIndex = document.getElementById('editRecordRowIndex').value;
-      const saleDate = document.getElementById('editRecordDate').value.trim();
+      const rowIndex = document.getElementById('editRowIndex').value;
       const title = document.getElementById('editRecordTitle').value.trim();
-      const platform = document.getElementById('editRecordPlatform').value.trim();
-      const countTag = document.getElementById('editRecordCount').value.trim();
-      const imageUrl = document.getElementById('editRecordImage').value.trim();
-
-      if (!title || !saleDate || !platform || !countTag) {
-        return alert("請填寫所有必填欄位！");
-      }
+      if (!title) return alert("請填寫節目名稱！");
 
       const btn = document.getElementById('btnEditRecordConfirm');
       btn.disabled = true;
-      btn.innerText = "更新中...";
+      btn.innerText = "儲存中...";
 
       try {
         await fetch(GAS_WEB_APP_URL, {
           method: "POST",
-          mode: "no-cors",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
             action: "update_record",
             rowIndex: rowIndex,
-            saleDate: saleDate,
+            saleDate: document.getElementById('editRecordSaleDate').value.trim(),
             title: title,
-            platform: platform,
-            countTag: countTag,
-            imageUrl: imageUrl,
+            platform: document.getElementById('editRecordPlatform').value.trim(),
+            countTag: document.getElementById('editRecordCountTag').value.trim(),
+            imageUrl: document.getElementById('editRecordImage').value.trim(),
             imageBase64: editBase64
           })
         });
 
-        alert("戰績修改成功！");
+        alert("更新成功！");
         closeEditRecordModal();
-        setTimeout(fetchSheetRecords, 1200);
+        fetchSheetRecords();
       } catch (e) {
-        alert("修改失敗：" + e.message);
+        alert("更新失敗：" + e.message);
       } finally {
         btn.disabled = false;
         btn.innerText = "儲存變更";
       }
     }
 
-    async function deleteRecordItem(rowIndex) {
-      if (!confirm("確定要刪除這筆戰績紀錄嗎？試算表中的資料將會直接被刪除。")) return;
-
+    async function deleteRecord(rowIndex) {
+      if (!confirm(`確定要刪除第 ${rowIndex} 列這筆戰績嗎？`)) return;
       try {
         await fetch(GAS_WEB_APP_URL, {
           method: "POST",
-          mode: "no-cors",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            action: "delete_record",
-            rowIndex: rowIndex
-          })
+          body: JSON.stringify({ action: "delete_record", rowIndex: rowIndex })
         });
-
-        alert("刪除成功！");
-        setTimeout(fetchSheetRecords, 1200);
+        fetchSheetRecords();
       } catch (e) {
         alert("刪除失敗：" + e.message);
       }
     }
 
-    function openPublishModal(idx) {
-      const ev = adminEvents[idx];
-      if (!ev) return;
-      document.getElementById('modalEventId').value = ev.id;
-      document.getElementById('modalDate').value = (ev.ticketDate || '').replace(/-/g, '.');
-      document.getElementById('modalTitle').value = '';
-      document.getElementById('modalPlatform').value = detectPlatformFromUrl(ev.ticketLink);
-      document.getElementById('modalCount').value = buildFormattedCountTag(ev);
-      document.getElementById('modalImage').value = '';
-      modalBase64 = '';
-      document.getElementById('modalFileInput').value = '';
-      document.getElementById('modalPreview').src = '';
-      document.getElementById('modalDropPrompt').classList.remove('hidden');
-      document.getElementById('modalPreviewContainer').classList.add('hidden');
-      document.getElementById('publishModal').classList.add('active');
-    }
-
-    function closePublishModal() {
-      document.getElementById('publishModal').classList.remove('active');
-    }
-
-    async function confirmPublishAndSuccess() {
-      const eventId = document.getElementById('modalEventId').value;
-      const saleDate = document.getElementById('modalDate').value.trim();
-      const title = document.getElementById('modalTitle').value.trim();
-      const platform = document.getElementById('modalPlatform').value.trim();
-      const countTag = document.getElementById('modalCount').value.trim();
-      const imageUrl = document.getElementById('modalImage').value.trim();
-
-      if (!title) return alert("請輸入節目名稱！");
-
-      const btn = document.getElementById('btnModalConfirm');
-      btn.disabled = true;
-      btn.innerText = "處理中...";
-
-      try {
-        await fetch(GAS_WEB_APP_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            action: "publish_and_mark_success",
-            eventId: eventId,
-            saleDate: saleDate,
-            title: title,
-            platform: platform,
-            countTag: countTag,
-            imageUrl: imageUrl,
-            imageBase64: modalBase64
-          })
-        });
-
-        alert("已標記成功並插入至戰績試算表最上方！");
-        closePublishModal();
-        setTimeout(fetchAdminEvents, 1200);
-      } catch (e) {
-        alert("操作失敗：" + e.message);
-      } finally {
-        btn.disabled = false;
-        btn.innerText = "確認發布";
-      }
-    }
-
     async function submitNewRecord() {
-      const saleDate = document.getElementById('recDate').value.trim();
       const title = document.getElementById('recTitle').value.trim();
-      const platform = document.getElementById('recPlatform').value.trim();
-      const countTag = document.getElementById('recCount').value.trim();
-      const imageUrl = document.getElementById('recImage').value.trim();
+      if (!title) return alert("請填寫節目名稱！");
 
-      if (!saleDate || !title || !countTag || !platform) {
-        return alert("請填寫所有必填欄位！");
-      }
-
-      const btn = document.getElementById('btnSubmitRecord');
+      const btn = document.getElementById('btnSubmitRec');
       btn.disabled = true;
-      btn.innerText = "寫入中...";
+      btn.innerText = "寫入試算表中...";
 
       try {
         await fetch(GAS_WEB_APP_URL, {
           method: "POST",
-          mode: "no-cors",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
             action: "add_record",
-            saleDate: saleDate,
+            saleDate: document.getElementById('recDate').value.trim(),
             title: title,
-            platform: platform,
-            countTag: countTag,
-            imageUrl: imageUrl,
+            platform: document.getElementById('recPlatform').value.trim(),
+            countTag: document.getElementById('recCount').value.trim(),
+            imageUrl: document.getElementById('recImage').value.trim(),
             imageBase64: recBase64
           })
         });
@@ -848,7 +885,7 @@
         document.getElementById('recImage').value = '';
         clearImage({ stopPropagation: () => {} }, 'rec');
         location.hash = '#records';
-        setTimeout(fetchSheetRecords, 1200);
+        fetchSheetRecords();
       } catch (e) {
         alert("寫入失敗：" + e.message);
       } finally {
@@ -864,17 +901,11 @@
       try {
         await fetch(GAS_WEB_APP_URL, {
           method: "POST",
-          mode: "no-cors",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            action: "update_status",
-            eventId: eventId,
-            status: status
-          })
+          body: JSON.stringify({ action: "update_status", eventId: eventId, status: status })
         });
-
         alert("更新指令已送出！");
-        setTimeout(fetchAdminEvents, 1200);
+        fetchAdminEvents();
       } catch (e) {
         alert("更新失敗：" + e.message);
       }
