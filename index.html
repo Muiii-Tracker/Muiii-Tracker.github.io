@@ -680,10 +680,13 @@
     };
 
     function getBadgeHtml(isExpired, statusVal) {
+      const val = (statusVal || '').trim();
+      if (val === '不受理') {
+        return '<span class="item-badge" style="background:#f1f5f9;color:#64748b;border:1px solid #cbd5e1;">🚫 不受理</span>';
+      }
       if (!isExpired) {
         return '<span class="item-badge badge-active">進行中</span>';
       }
-      const val = (statusVal || '').trim();
       if (val === '成功' || val === '搶票成功') {
         return '<span class="item-badge badge-success">🎉 搶票成功</span>';
       } else if (val === '失敗' || val === '未搶到' || val === '未得標') {
