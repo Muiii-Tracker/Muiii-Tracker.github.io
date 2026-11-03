@@ -332,14 +332,14 @@
             ✍️ 請填寫未受理原因 (將顯示在客戶的 LINE 卡片上)：
           </label>
           <div class="flex flex-wrap gap-1.5 mb-2">
+            <button type="button" onclick="setRejectReason('預約時間無法協助，造成不便敬請見諒！')" class="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold transition">
+              預約時間無法協助
+            </button>
             <button type="button" onclick="setRejectReason('因委託名額已滿，暫無法受理您的委託，敬請見諒！')" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-[11px] font-bold transition">
               名額已滿
             </button>
             <button type="button" onclick="setRejectReason('因代搶排程衝突，此時段暫不開放接單，敬請見諒！')" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-[11px] font-bold transition">
               排程衝突
-            </button>
-            <button type="button" onclick="setRejectReason('此場次目前暫停受理預約，造成不便敬請見諒！')" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-[11px] font-bold transition">
-              場次暫停
             </button>
           </div>
           <textarea id="rejectReasonTextarea" rows="4" placeholder="在此自由輸入您想告知客戶的未受理原因..." class="w-full p-3 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-rose-500 focus:bg-rose-50/10"></textarea>
@@ -1036,7 +1036,7 @@
       document.getElementById('rejectEventId').value = ev.id;
       document.getElementById('rejectEventName').innerText = ev.name || '未指定';
       document.getElementById('rejectEventTime').innerText = `${ev.ticketDate || ''} ${ev.ticketTime || ''}`.trim() || '未指定';
-      document.getElementById('rejectReasonTextarea').value = "因委託名額已滿，暫無法受理您的委託，敬請見諒！";
+      document.getElementById('rejectReasonTextarea').value = "預約時間無法協助，造成不便敬請見諒！";
       document.getElementById('rejectModal').classList.add('active');
     }
 
@@ -1095,9 +1095,9 @@
           alert("此委託售票時間已過，無法改為不受理！");
           return;
         }
-        const inputReason = prompt("確定要將此行程改為【不受理】嗎？\n系統將會【發送 LINE 通知卡片給客戶】並【同步從日曆刪除此行程】。\n\n請輸入未受理原因（留空預設為名額已滿）：", "因委託名額已滿，暫無法受理您的委託，敬請見諒！");
+        const inputReason = prompt("確定要將此行程改為【不受理】嗎？\n系統將會【發送 LINE 通知卡片給客戶】並【同步從日曆刪除此行程】。\n\n請輸入未受理原因（留空預設為預約時間無法協助）：", "預約時間無法協助，造成不便敬請見諒！");
         if (inputReason === null) return; // 使用者按取消
-        reason = inputReason.trim() || "因委託名額已滿，暫無法受理您的委託，敬請見諒！";
+        reason = inputReason.trim() || "預約時間無法協助，造成不便敬請見諒！";
       } else if (isResettingSuccess) {
         if (!confirm("確定要將此行程重設為【待處理】狀態嗎？\n⚠️ 系統將會同步刪除戰績試算表中對應的成功紀錄！")) return;
       } else {
