@@ -1,921 +1,692 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-TW" class="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Muiii 管理後台</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;800&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif; background-color: #f8fafc; }
-    .modal-bg { display: none; position: fixed; inset: 0; z-index: 50; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 16px; }
-    .modal-bg.active { display: flex; }
-  </style>
-</head>
-<body class="text-slate-800 antialiased min-h-screen flex flex-col">
-
-  <div class="flex-grow pb-16">
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
-      <div class="container mx-auto px-4 max-w-6xl py-4 flex flex-wrap items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-          <span class="text-xl font-black italic tracking-tighter text-slate-900">Muiii</span>
-          <span class="text-xs font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">管理後台</span>
-          <div class="flex bg-slate-100 p-1 rounded-xl gap-1">
-            <a href="#orders" id="navOrders" class="px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-500 hover:text-slate-900">📋 管理資料</a>
-            <a href="#records" id="navRecords" class="px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-500 hover:text-slate-900">🏆 戰績管理</a>
-            <a href="#add-record" id="navAddRecord" class="px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-500 hover:text-slate-900">➕ 新增戰績</a>
-            <a href="#settings" id="navSettings" class="px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-500 hover:text-slate-900">⚙️ 系統設定</a>
-          </div>
-        </div>
-        <div class="flex items-center gap-2">
-          <a href="../Record/" target="_blank" class="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-xs font-bold transition flex items-center gap-1.5 text-emerald-700">
-            <i class="fas fa-external-link-alt"></i> 查看戰績
-          </a>
-          <button onclick="refreshCurrentTab()" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold transition flex items-center gap-1.5 text-slate-600">
-            <i class="fas fa-rotate"></i> 重新載入
-          </button>
-        </div>
-      </div>
-    </header>
-
-    <!-- 管理資料頁面 -->
-    <main id="tabOrders" class="container mx-auto px-4 max-w-6xl mt-6 hidden">
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200 mb-6 shadow-sm">
-        <div class="relative w-full sm:w-80">
-          <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-          <input type="text" id="adminSearchInput" oninput="renderAdminList()" placeholder="搜尋姓名、帳號、售票時間..." class="w-full pl-9 pr-3 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-emerald-500 font-bold">
-        </div>
-        <div class="flex items-center gap-2 w-full sm:w-auto">
-          <select id="statusFilter" onchange="renderAdminList()" class="px-3 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 font-bold text-slate-600 focus:outline-none flex-1 sm:flex-none">
-            <option value="all">所有狀態</option>
-            <option value="pending">待搶票 / 處理中</option>
-            <option value="success">🎉 搶票成功</option>
-            <option value="failed">❌ 搶票失敗</option>
-          </select>
-          <select id="sortSelect" onchange="renderAdminList()" class="px-3 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 font-bold text-emerald-600 focus:outline-none flex-1 sm:flex-none">
-            <option value="desc">新到舊</option>
-            <option value="asc">舊到新</option>
-          </select>
-        </div>
-      </div>
-
-      <div id="loadingOrders" class="text-center py-20 text-slate-400 font-bold text-sm">
-        <i class="fas fa-spinner animate-spin text-2xl text-emerald-500 mb-2 block"></i> 資料載入中...
-      </div>
-
-      <div id="adminCardList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-    </main>
-
-    <!-- 戰績管理頁面 -->
-    <main id="tabRecords" class="container mx-auto px-4 max-w-6xl mt-6 hidden">
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200 mb-6 shadow-sm">
-        <div class="relative w-full sm:w-80">
-          <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-          <input type="text" id="recordSearchInput" oninput="renderRecordsList()" placeholder="搜尋戰績節目、平台、日期..." class="w-full pl-9 pr-3 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-emerald-500 font-bold">
-        </div>
-        <div class="flex items-center gap-2 w-full sm:w-auto">
-          <select id="recordSortSelect" onchange="renderRecordsList()" class="px-3 py-2 text-sm rounded-xl bg-slate-50 border border-slate-200 font-bold text-emerald-600 focus:outline-none flex-1 sm:flex-none">
-            <option value="desc">新到舊</option>
-            <option value="asc">舊到新</option>
-          </select>
-          <a href="#add-record" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-sm whitespace-nowrap inline-block">
-            ➕ 新增戰績
-          </a>
-        </div>
-      </div>
-
-      <div id="loadingRecords" class="text-center py-20 text-slate-400 font-bold text-sm">
-        <i class="fas fa-spinner animate-spin text-2xl text-emerald-500 mb-2 block"></i> 資料載入中...
-      </div>
-
-      <div id="recordsCardList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-    </main>
-
-    <!-- 新增戰績頁面 -->
-    <main id="tabAddRecord" class="container mx-auto px-4 max-w-2xl mt-6 hidden">
-      <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
-        <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
-          <div>
-            <h2 class="text-xl font-black text-slate-900">🏆 新增戰績至試算表</h2>
-            <p class="text-xs text-slate-400 font-bold mt-1">送出後將自動插入至試算表最上方</p>
-          </div>
-        </div>
-
-        <div class="space-y-4">
-          <div>
-            <label class="block text-xs font-bold text-slate-500 mb-1.5">售票日期 *</label>
-            <input type="text" id="recDate" placeholder="例如：2026.09.26" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 font-bold text-sm focus:outline-none focus:border-emerald-500">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-500 mb-1.5">節目名稱 *</label>
-            <input type="text" id="recTitle" placeholder="例如：MAMAMOO 2026 WORLD TOUR" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 font-bold text-sm focus:outline-none focus:border-emerald-500">
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-bold text-slate-500 mb-1.5">售票平台 *</label>
-              <input type="text" id="recPlatform" list="platformOptions" placeholder="選擇或輸入售票平台" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 font-bold text-sm focus:outline-none focus:border-emerald-500">
-              <datalist id="platformOptions"></datalist>
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-500 mb-1.5">張數 *</label>
-              <input type="text" id="recCount" placeholder="例如：12/05_黃3H區1800*2" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 font-bold text-sm focus:outline-none focus:border-emerald-500">
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-slate-500 mb-1.5">上傳戰報截圖 (選填)</label>
-            <div onclick="triggerFileInput('recFileInput')" class="border-2 border-dashed border-slate-200 hover:border-emerald-500 rounded-2xl p-4 text-center cursor-pointer transition bg-slate-50 hover:bg-emerald-50/30">
-              <input type="file" id="recFileInput" accept="image/*" class="hidden" onchange="handleFileChange(event, 'recPreview', 'recDropPrompt', 'rec')">
-              <div id="recDropPrompt" class="py-2">
-                <i class="fas fa-cloud-arrow-up text-2xl text-slate-400 mb-1"></i>
-                <p class="text-xs font-bold text-slate-600">點擊上傳或直接 Ctrl+V 貼上截圖</p>
-              </div>
-              <div id="recPreviewContainer" class="hidden relative inline-block mt-2">
-                <img id="recPreview" src="" class="max-h-40 rounded-xl shadow-sm border border-slate-200">
-                <button type="button" onclick="clearImage(event, 'rec')" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow-md">
-                  <i class="fas fa-times"></i>
-                </button>
-              </div>
-            </div>
-            <div class="mt-2">
-              <input type="url" id="recImage" placeholder="或填寫圖片網址 https://..." class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium focus:outline-none focus:border-emerald-500">
-            </div>
-          </div>
-
-          <button id="btnSubmitRec" onclick="submitNewRecord()" class="w-full mt-4 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-md shadow-emerald-600/20 transition">
-            ➕ 新增戰績至試算表
-          </button>
-        </div>
-      </div>
-    </main>
-
-    <!-- 系統設定頁面 -->
-    <main id="tabSettings" class="container mx-auto px-4 max-w-4xl mt-6 hidden">
-      <!-- 提示卡片 -->
-      <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 flex items-start gap-3 shadow-sm">
-        <i class="fas fa-bell text-amber-500 text-lg mt-0.5"></i>
-        <div class="text-xs text-amber-800 leading-relaxed">
-          <p class="font-bold mb-0.5">暫停服務與日期比對規則說明：</p>
-          當客戶選擇的「售票日期」落在啟用中的暫停區間內時，系統會自動攔截並提示：<span class="font-black text-amber-900">「抱歉 MM/DD~MM/DD暫停服務」</span>。
-        </div>
-      </div>
-
-      <!-- 新增規則卡片 -->
-      <div class="bg-white rounded-3xl border border-slate-200 p-6 mb-6 shadow-sm">
-        <h2 class="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
-          <span>➕ 新增暫停服務區間</span>
-        </h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-          <div>
-            <label class="block text-xs font-bold text-slate-500 mb-1.5">開始日期 *</label>
-            <input type="date" id="newPauseStart" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-500">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-500 mb-1.5">結束日期 (單日可免填)</label>
-            <input type="date" id="newPauseEnd" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-500">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-500 mb-1.5">暫停原因 / 備註</label>
-            <input type="text" id="newPauseReason" placeholder="例如：出國休假、公休" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-500">
-          </div>
-          <div>
-            <button onclick="submitNewPauseRule()" id="btnAddPauseRule" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition">
-              儲存新增
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- 設定列表 -->
-      <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-black text-slate-900">📋 目前設定的暫停區間</h2>
-          <button onclick="fetchPauseRulesAdmin()" class="text-xs text-slate-500 hover:text-slate-800 font-bold">
-            <i class="fas fa-rotate"></i> 重新載入
-          </button>
-        </div>
-
-        <div id="loadingPauseRules" class="text-center py-10 text-slate-400 font-bold text-xs">
-          <i class="fas fa-spinner animate-spin text-lg text-emerald-500 mb-1 block"></i> 讀取設定中...
-        </div>
-
-        <div id="pauseRulesList" class="space-y-3"></div>
-      </div>
-    </main>
-
-  </div>
-
-  <!-- 發布戰績彈窗 -->
-  <div id="publishModal" class="modal-bg">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
-      <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
-        <div>
-          <h3 class="font-black text-base text-slate-900">🚀 發布至戰績頁</h3>
-          <p class="text-xs text-slate-400 font-bold">儲存後行程狀態將自動更新為「成功」</p>
-        </div>
-        <button onclick="closePublishModal()" class="text-slate-400 hover:text-slate-600 p-1"><i class="fas fa-times text-sm"></i></button>
-      </div>
-      <input type="hidden" id="modalEventId">
-      <div class="space-y-3">
-        <div>
-          <label class="block text-xs font-bold text-slate-500 mb-1">售票日期</label>
-          <input type="text" id="modalSaleDate" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-500">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-500 mb-1">節目名稱 *</label>
-          <input type="text" id="modalTitle" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-500">
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold text-slate-500 mb-1">售票平台</label>
-            <input type="text" id="modalPlatform" list="platformOptions" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-500">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-500 mb-1">張數 / 標籤</label>
-            <input type="text" id="modalCountTag" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-500">
-          </div>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-500 mb-1">戰報圖片 (截圖)</label>
-          <div onclick="triggerFileInput('modalFileInput')" class="border-2 border-dashed border-slate-200 hover:border-emerald-500 rounded-xl p-3 text-center cursor-pointer transition bg-slate-50">
-            <input type="file" id="modalFileInput" accept="image/*" class="hidden" onchange="handleFileChange(event, 'modalPreview', 'modalDropPrompt', 'modal')">
-            <div id="modalDropPrompt" class="py-1">
-              <i class="fas fa-cloud-arrow-up text-lg text-slate-400"></i>
-              <p class="text-xs font-bold text-slate-500">點擊上傳或 Ctrl+V 貼上圖片</p>
-            </div>
-            <div id="modalPreviewContainer" class="hidden relative inline-block mt-1">
-              <img id="modalPreview" src="" class="max-h-32 rounded-lg border border-slate-200">
-              <button type="button" onclick="clearImage(event, 'modal')" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-          </div>
-          <div class="mt-1.5">
-            <input type="url" id="modalImage" placeholder="或填寫圖片網址 https://..." class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-medium focus:outline-none focus:border-emerald-500">
-          </div>
-        </div>
-      </div>
-      <div class="mt-5 flex gap-2">
-        <button onclick="closePublishModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 font-bold text-xs text-slate-600">取消</button>
-        <button id="btnPublishConfirm" onclick="confirmPublishRecord()" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20">發布並標記成功</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 編輯戰績彈窗 -->
-  <div id="editRecordModal" class="modal-bg">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
-      <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
-        <div>
-          <h3 class="font-black text-base text-slate-900">✏️ 編輯戰績資料</h3>
-          <p class="text-xs text-slate-400 font-bold">更新試算表第 <span id="editRowDisplay" class="text-emerald-600 font-bold"></span> 列紀錄</p>
-        </div>
-        <button onclick="closeEditRecordModal()" class="text-slate-400 hover:text-slate-600 p-1"><i class="fas fa-times text-sm"></i></button>
-      </div>
-      <input type="hidden" id="editRowIndex">
-      <div class="space-y-3">
-        <div>
-          <label class="block text-xs font-bold text-slate-500 mb-1">售票日期</label>
-          <input type="text" id="editRecordSaleDate" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-500">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-500 mb-1">節目名稱 *</label>
-          <input type="text" id="editRecordTitle" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-500">
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold text-slate-500 mb-1">售票平台</label>
-            <input type="text" id="editRecordPlatform" list="platformOptions" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-500">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-500 mb-1">張數 / 標籤</label>
-            <input type="text" id="editRecordCountTag" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-emerald-500">
-          </div>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-500 mb-1">戰報圖片</label>
-          <div onclick="triggerFileInput('editFileInput')" class="border-2 border-dashed border-slate-200 hover:border-emerald-500 rounded-xl p-3 text-center cursor-pointer transition bg-slate-50">
-            <input type="file" id="editFileInput" accept="image/*" class="hidden" onchange="handleFileChange(event, 'editPreview', 'editDropPrompt', 'edit')">
-            <div id="editDropPrompt" class="py-1">
-              <i class="fas fa-cloud-arrow-up text-lg text-slate-400"></i>
-              <p class="text-xs font-bold text-slate-500">點擊上傳或 Ctrl+V 貼上圖片</p>
-            </div>
-            <div id="editPreviewContainer" class="hidden relative inline-block mt-1">
-              <img id="editPreview" src="" class="max-h-32 rounded-lg border border-slate-200">
-              <button type="button" onclick="clearImage(event, 'edit')" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-          </div>
-          <div class="mt-1.5">
-            <input type="url" id="editRecordImage" placeholder="或填寫圖片網址 https://..." class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-medium focus:outline-none focus:border-emerald-500">
-          </div>
-        </div>
-      </div>
-      <div class="mt-5 flex gap-2">
-        <button onclick="closeEditRecordModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 font-bold text-xs text-slate-600">取消</button>
-        <button id="btnEditRecordConfirm" onclick="confirmUpdateRecord()" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20">儲存變更</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwbjjKVDfgjqGNmlbK30tfe-7ybMTYNyJ6820IDMM-CSgjIIY4yx8FckBpjzF1sH7Ac/exec";
-    let adminEvents = [];
-    let sheetRecords = [];
-    let pauseRulesAdmin = [];
-    let defaultPlatforms = [
-      "Tixcraft 拓元售票", "添翼 Teamear", "Indievox 獨立音樂", "KKTIX", "iBon",
-      "FamiTicket 全網", "Kham 寬宏售票", "Ticket.com.tw 年代", "UDN售票網",
-      "TicketPlus 遠大", "FunOne Tickets", "FANSI GO", "Urbtix 城市",
-      "Cityline 買飛", "HKTicketing 快達票", "澳門銀河", "TicketMaster Singapore",
-      "Ticketek Australia", "KLOOK"
-    ];
-
-    let recBase64 = "";
-    let modalBase64 = "";
-    let editBase64 = "";
-
-    window.addEventListener('hashchange', applyRouteFromHash);
-
-    window.onload = function() {
-      renderPlatformDatalist(defaultPlatforms);
-      setupPasteListener();
-      const d = new Date();
-      const pad = n => String(n).padStart(2, '0');
-      document.getElementById('recDate').value = `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())}`;
-      applyRouteFromHash();
-    };
-
-    function applyRouteFromHash() {
-      const rawHash = window.location.hash.toLowerCase().replace(/^[#\/]+/, '');
-      let targetRoute = 'orders';
-      if (rawHash === 'records') targetRoute = 'records';
-      else if (rawHash === 'add-record') targetRoute = 'addRecord';
-      else if (rawHash === 'settings') targetRoute = 'settings';
-
-      renderTabView(targetRoute);
-    }
-
-    function renderTabView(tab) {
-      const isOrders = tab === 'orders';
-      const isRecords = tab === 'records';
-      const isAdd = tab === 'addRecord';
-      const isSettings = tab === 'settings';
-
-      document.getElementById('tabOrders').classList.toggle('hidden', !isOrders);
-      document.getElementById('tabRecords').classList.toggle('hidden', !isRecords);
-      document.getElementById('tabAddRecord').classList.toggle('hidden', !isAdd);
-      document.getElementById('tabSettings').classList.toggle('hidden', !isSettings);
-
-      document.getElementById('navOrders').className = isOrders ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition" : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition";
-      document.getElementById('navRecords').className = isRecords ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition" : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition";
-      document.getElementById('navAddRecord').className = isAdd ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition" : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition";
-      document.getElementById('navSettings').className = isSettings ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition" : "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 transition";
-
-      if (isOrders && adminEvents.length === 0) fetchAdminEvents();
-      else if (isRecords && sheetRecords.length === 0) fetchSheetRecords();
-      else if (isSettings) fetchPauseRulesAdmin();
-    }
-
-    function triggerFileInput(id) {
-      document.getElementById(id).click();
-    }
-
-    function refreshCurrentTab() {
-      const rawHash = window.location.hash.toLowerCase().replace(/^[#\/]+/, '');
-      if (rawHash === 'records') fetchSheetRecords();
-      else if (rawHash === 'settings') fetchPauseRulesAdmin();
-      else fetchAdminEvents();
-    }
-
-    function setupPasteListener() {
-      document.addEventListener("paste", function(e) {
-        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-        let blob = null;
-        for (let i = 0; i < items.length; i++) {
-          if (items[i].type.indexOf("image") !== -1) {
-            blob = items[i].getAsFile();
-            break;
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Muiii 搶票戰績</title>
+    <meta name="theme-color" content="#f8fafc">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;500;700;900&family=Oswald:wght@500;700&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Noto Sans TC', 'sans-serif'],
+                        oswald: ['Oswald', 'sans-serif'],
+                    },
+                    animation: {
+                        'soft-blob': 'softBlob 15s infinite ease-in-out',
+                        'fade-in-up': 'fadeInUp 0.4s ease-out forwards',
+                        'shimmer': 'shimmer 1.8s infinite linear',
+                    },
+                    keyframes: {
+                        softBlob: {
+                            '0%, 100%': { transform: 'translate(0px, 0px) scale(1)', opacity: '0.3' },
+                            '33%': { transform: 'translate(30px, -30px) scale(1.1)', opacity: '0.4' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)', opacity: '0.3' },
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(12px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        shimmer: {
+                            '0%': { backgroundPosition: '-200% 0' },
+                            '100%': { backgroundPosition: '200% 0' },
+                        }
+                    }
+                }
+            }
         }
-        if (!blob) return;
-
-        if (document.getElementById('editRecordModal').classList.contains('active')) {
-          processImageFile(blob, 'editPreview', 'editDropPrompt', 'edit');
-        } else if (document.getElementById('publishModal').classList.contains('active')) {
-          processImageFile(blob, 'modalPreview', 'modalDropPrompt', 'modal');
-        } else {
-          processImageFile(blob, 'recPreview', 'recDropPrompt', 'rec');
+    </script>
+    <style>
+        :root {
+            --brand-primary: #059669;
+            --brand-accent: #10b981;
+            --brand-cyan: #0d9488;
+            --bg-light: #f8fafc;
+            --text-main: #0f172a;
         }
-      });
-    }
-
-    function handleFileChange(event, previewId, promptId, type) {
-      const file = event.target.files[0];
-      if (file) processImageFile(file, previewId, promptId, type);
-    }
-
-    function processImageFile(file, previewId, promptId, type) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const b64 = e.target.result;
-        if (type === 'modal') {
-          modalBase64 = b64;
-          document.getElementById('modalImage').value = '';
-          document.getElementById('modalPreview').src = b64;
-          document.getElementById('modalDropPrompt').classList.add('hidden');
-          document.getElementById('modalPreviewContainer').classList.remove('hidden');
-        } else if (type === 'edit') {
-          editBase64 = b64;
-          document.getElementById('editRecordImage').value = '';
-          document.getElementById('editPreview').src = b64;
-          document.getElementById('editDropPrompt').classList.add('hidden');
-          document.getElementById('editPreviewContainer').classList.remove('hidden');
-        } else {
-          recBase64 = b64;
-          document.getElementById('recImage').value = '';
-          document.getElementById('recPreview').src = b64;
-          document.getElementById('recDropPrompt').classList.add('hidden');
-          document.getElementById('recPreviewContainer').classList.remove('hidden');
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            overflow-x: hidden;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
-      };
-      reader.readAsDataURL(file);
-    }
+        .dark body {
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-thumb { background: #334155; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--brand-primary); }
 
-    function clearImage(e, type) {
-      e.stopPropagation();
-      if (type === 'modal') {
-        modalBase64 = '';
-        document.getElementById('modalFileInput').value = '';
-        document.getElementById('modalPreview').src = '';
-        document.getElementById('modalDropPrompt').classList.remove('hidden');
-        document.getElementById('modalPreviewContainer').classList.add('hidden');
-      } else if (type === 'edit') {
-        editBase64 = '';
-        document.getElementById('editFileInput').value = '';
-        document.getElementById('editPreview').src = '';
-        document.getElementById('editDropPrompt').classList.remove('hidden');
-        document.getElementById('editPreviewContainer').classList.add('hidden');
-      } else {
-        recBase64 = '';
-        document.getElementById('recFileInput').value = '';
-        document.getElementById('recPreview').src = '';
-        document.getElementById('recDropPrompt').classList.remove('hidden');
-        document.getElementById('recPreviewContainer').classList.add('hidden');
-      }
-    }
-
-    function renderPlatformDatalist(platforms) {
-      const dl = document.getElementById('platformOptions');
-      if (!dl) return;
-      dl.innerHTML = (platforms || []).map(p => `<option value="${p}">`).join('');
-    }
-
-    // ==================== 系統設定模組 JS ====================
-
-    async function fetchPauseRulesAdmin() {
-      document.getElementById('loadingPauseRules').style.display = 'block';
-      document.getElementById('pauseRulesList').innerHTML = '';
-      try {
-        const resp = await fetch(`${GAS_WEB_APP_URL}?action=get_all_pause_rules`);
-        pauseRulesAdmin = await resp.json();
-        renderPauseRulesList();
-      } catch (err) {
-        document.getElementById('pauseRulesList').innerHTML = '<p class="text-xs text-red-500 font-bold">載入失敗，請確認 GAS 是否已發布最新版本。</p>';
-      } finally {
-        document.getElementById('loadingPauseRules').style.display = 'none';
-      }
-    }
-
-    function renderPauseRulesList() {
-      const container = document.getElementById('pauseRulesList');
-      if (pauseRulesAdmin.length === 0) {
-        container.innerHTML = '<p class="text-xs text-slate-400 font-bold py-4 text-center">目前沒有任何暫停服務設定</p>';
-        return;
-      }
-
-      const toMMDD = dStr => {
-        const p = dStr.split('-');
-        return p.length >= 3 ? `${p[1]}/${p[2]}` : dStr;
-      };
-
-      container.innerHTML = pauseRulesAdmin.map(rule => {
-        const rangeText = (rule.startDate === rule.endDate) 
-          ? toMMDD(rule.startDate) 
-          : `${toMMDD(rule.startDate)}~${toMMDD(rule.endDate)}`;
+        .ticket-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+        .dark .ticket-card {
+            background: #1e293b;
+            border-color: #334155;
+        }
+        .ticket-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--brand-primary), var(--brand-accent));
+        }
+        .ticket-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 16px 22px -5px rgba(0, 0, 0, 0.08);
+            border-color: var(--brand-primary);
+        }
+        .ticket-stub {
+            background: #f1f5f9;
+            border-right: 1px dashed #e2e8f0;
+        }
+        .dark .ticket-stub {
+            background: #0f172a;
+            border-right-color: #334155;
+        }
+        .ticket-dashed-line {
+            border-bottom: 2px dashed #e2e8f0;
+            position: relative;
+        }
+        .dark .ticket-dashed-line {
+            border-bottom-color: #334155;
+        }
+        .ticket-dashed-line::before, .ticket-dashed-line::after {
+            content: ''; position: absolute; width: 18px; height: 18px;
+            background-color: var(--bg-light); border-radius: 50%; top: -9px;
+            box-shadow: inset 0 0 4px rgba(0,0,0,0.03);
+            transition: background-color 0.3s ease;
+        }
+        .dark .ticket-dashed-line::before, .dark .ticket-dashed-line::after {
+            background-color: #0f172a;
+        }
+        .ticket-dashed-line::before { left: -29px; }
+        .ticket-dashed-line::after { right: -29px; }
         
-        return `
-          <div class="flex items-center justify-between p-3.5 rounded-2xl border ${rule.enabled ? 'border-slate-200 bg-white' : 'border-slate-100 bg-slate-50 opacity-70'}">
-            <div class="flex items-center gap-3">
-              <span class="px-2.5 py-1 rounded-full text-xs font-extrabold ${rule.enabled ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-200 text-slate-600'}">
-                ${rule.enabled ? '啟用中' : '已停用'}
-              </span>
-              <div>
-                <div class="text-sm font-black text-slate-900">${rule.startDate} 至 ${rule.endDate} <span class="text-xs text-slate-500 font-bold">(${rangeText})</span></div>
-                <div class="text-xs text-slate-500 font-medium">原因：${rule.reason}</div>
-              </div>
-            </div>
-            <div class="flex items-center gap-2">
-              <button onclick="togglePauseRule(${rule.rowIndex}, ${!rule.enabled})" class="px-3 py-1.5 rounded-lg text-xs font-bold border transition ${rule.enabled ? 'border-amber-200 text-amber-700 bg-amber-50 hover:bg-amber-100' : 'border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100'}">
-                ${rule.enabled ? '停用' : '啟用'}
-              </button>
-              <button onclick="deletePauseRule(${rule.rowIndex})" class="px-3 py-1.5 rounded-lg text-xs font-bold border border-red-200 text-red-600 bg-red-50 hover:bg-red-100 transition">
-                刪除
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    async function submitNewPauseRule() {
-      const startDate = document.getElementById('newPauseStart').value;
-      const endDate = document.getElementById('newPauseEnd').value || startDate;
-      const reason = document.getElementById('newPauseReason').value.trim() || "暫停服務";
-
-      if (!startDate) return alert("請選擇開始日期！");
-      if (startDate > endDate) return alert("結束日期不可早於開始日期！");
-
-      const btn = document.getElementById('btnAddPauseRule');
-      btn.disabled = true;
-      btn.innerText = "儲存中...";
-
-      try {
-        await fetch(GAS_WEB_APP_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            action: "add_pause_rule",
-            startDate: startDate,
-            endDate: endDate,
-            reason: reason,
-            enabled: true
-          })
-        });
-
-        alert("新增成功！");
-        document.getElementById('newPauseStart').value = '';
-        document.getElementById('newPauseEnd').value = '';
-        document.getElementById('newPauseReason').value = '';
-        fetchPauseRulesAdmin();
-      } catch (e) {
-        alert("新增失敗：" + e.message);
-      } finally {
-        btn.disabled = false;
-        btn.innerText = "儲存新增";
-      }
-    }
-
-    async function togglePauseRule(rowIndex, newStatus) {
-      try {
-        await fetch(GAS_WEB_APP_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "toggle_pause_rule", rowIndex: rowIndex, enabled: newStatus })
-        });
-        fetchPauseRulesAdmin();
-      } catch (e) {
-        alert("更新失敗：" + e.message);
-      }
-    }
-
-    async function deletePauseRule(rowIndex) {
-      if (!confirm("確定要刪除這筆暫停服務設定嗎？")) return;
-      try {
-        await fetch(GAS_WEB_APP_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "delete_pause_rule", rowIndex: rowIndex })
-        });
-        fetchPauseRulesAdmin();
-      } catch (e) {
-        alert("刪除失敗：" + e.message);
-      }
-    }
-
-    // ==================== 訂單管理與戰績管理 JS ====================
-
-    async function fetchAdminEvents() {
-      document.getElementById('loadingOrders').style.display = 'block';
-      document.getElementById('adminCardList').innerHTML = '';
-      try {
-        const resp = await fetch(`${GAS_WEB_APP_URL}?action=get_all_events_admin`);
-        const data = await resp.json();
-        adminEvents = data.events || [];
-        if (data.platforms && data.platforms.length > 0) renderPlatformDatalist(data.platforms);
-        renderAdminList();
-      } catch (err) {
-        document.getElementById('adminCardList').innerHTML = '<p class="text-center col-span-2 text-xs text-red-500 font-bold">載入失敗</p>';
-      } finally {
-        document.getElementById('loadingOrders').style.display = 'none';
-      }
-    }
-
-    function renderAdminList() {
-      const listContainer = document.getElementById('adminCardList');
-      const search = document.getElementById('adminSearchInput').value.trim().toLowerCase();
-      const statusSelect = document.getElementById('statusFilter').value;
-      const sort = document.getElementById('sortSelect').value;
-
-      let filtered = adminEvents.filter(ev => {
-        const fullStr = `${ev.name} ${ev.account} ${ev.ticketDate} ${ev.ticketTime} ${ev.ticketArea}`.toLowerCase();
-        const matchSearch = !search || fullStr.includes(search);
-
-        let matchStatus = true;
-        const s = (ev.status || '').trim();
-        if (statusSelect === 'success') matchStatus = s === '成功' || s === '搶票成功';
-        else if (statusSelect === 'failed') matchStatus = s === '失敗' || s === '未搶到';
-        else if (statusSelect === 'pending') matchStatus = !s || (s !== '成功' && s !== '失敗');
-
-        return matchSearch && matchStatus;
-      });
-
-      filtered.sort((a, b) => {
-        const timeA = new Date(`${a.ticketDate}T${a.ticketTime}:00`).getTime();
-        const timeB = new Date(`${b.ticketDate}T${b.ticketTime}:00`).getTime();
-        return sort === 'asc' ? timeA - timeB : timeB - timeA;
-      });
-
-      if (filtered.length === 0) {
-        listContainer.innerHTML = '<div class="col-span-full py-16 text-center text-slate-400 font-bold text-xs">沒有找到符合條件的登記資料</div>';
-        return;
-      }
-
-      listContainer.innerHTML = filtered.map(ev => {
-        const s = (ev.status || '').trim();
-        const isHandled = s === '成功' || s === '失敗';
-        let statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">處理中</span>`;
-        if (s === '成功') {
-          statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">🎉 搶票成功</span>`;
-        } else if (s === '失敗') {
-          statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-red-50 text-red-600 border border-red-200">❌ 搶票失敗</span>`;
+        .cyber-select {
+            background-color: #ffffff;
+            color: var(--text-main);
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 0.6rem 2.2rem 0.6rem 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+            height: 44px;
+            white-space: nowrap;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.8rem center;
+            background-repeat: no-repeat;
+            background-size: 1.1em;
+        }
+        .dark .cyber-select {
+            background-color: #1e293b;
+            color: #f8fafc;
+            border-color: #334155;
+        }
+        .cyber-select:focus { 
+            border-color: var(--brand-primary);
+            box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1);
+        }
+        .sys-btn {
+            height: 40px; padding: 0 16px; border-radius: 12px;
+            background: #ffffff; border: 1px solid #e2e8f0; color: #64748b;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: all 0.3s; cursor: pointer; font-size: 0.85rem; font-weight: 700;
+        }
+        .dark .sys-btn {
+            background: #1e293b;
+            border-color: #334155;
+            color: #94a3b8;
+        }
+        .sys-btn:hover { 
+            color: var(--brand-primary); 
+            border-color: var(--brand-primary);
+            background: #f0fdf4;
+            transform: translateY(-1px);
+        }
+        .dark .sys-btn:hover {
+            background: #0f172a;
+        }
+        @media (max-width: 768px) {
+            .sys-btn { width: 40px; padding: 0; border-radius: 50%; }
+            .sys-btn span { display: none; }
         }
 
-        const actionButtonsHtml = isHandled ? '' : `
-          <div class="flex items-center gap-2 mt-4 pt-3 border-t border-slate-100">
-            <button onclick='openPublishModal(${JSON.stringify(ev)})' class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition">
-              🚀 成功並發布戰績
-            </button>
-            <button onclick="updateEventStatus('${ev.id}', '失敗')" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 font-bold text-xs transition">
-              標記失敗
-            </button>
-          </div>
-        `;
+        .skeleton-block {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.6s infinite;
+        }
+        .dark .skeleton-block {
+            background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.6s infinite;
+        }
 
-        return `
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:border-slate-300 transition">
-            <div class="flex items-start justify-between gap-2 mb-3">
-              <div>
-                <h3 class="font-extrabold text-base text-slate-900">${ev.name}</h3>
-                <p class="text-xs text-slate-500 font-bold mt-0.5">售票時間：<span class="text-emerald-700">${ev.ticketDate} ${ev.ticketTime}</span></p>
-              </div>
-              ${statusBadge}
+        .proof-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            background-color: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .proof-modal.active {
+            display: flex;
+        }
+
+        .line-float-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+            background-color: #06C755;
+            color: #ffffff;
+            border-radius: 9999px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 800;
+            font-size: 14px;
+            box-shadow: 0 10px 25px -3px rgba(6, 199, 85, 0.4), 0 4px 6px -2px rgba(6, 199, 85, 0.2);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            text-decoration: none;
+        }
+        .line-float-btn:hover {
+            transform: translateY(-3px) scale(1.03);
+            background-color: #05b34c;
+            box-shadow: 0 14px 30px -3px rgba(6, 199, 85, 0.5);
+        }
+        .line-float-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+        @media (max-width: 640px) {
+            .line-float-btn {
+                padding: 12px;
+                border-radius: 50%;
+                width: 48px;
+                height: 48px;
+                justify-content: center;
+                bottom: 20px;
+                right: 20px;
+            }
+            .line-float-btn span {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-col selection:bg-emerald-100 selection:text-emerald-900">
+    <div class="fixed inset-0 pointer-events-none z-[-1] overflow-hidden">
+        <div class="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-emerald-100/40 dark:bg-emerald-900/10 rounded-full blur-[120px] animate-soft-blob"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-teal-50/40 dark:bg-teal-900/10 rounded-full blur-[120px] animate-soft-blob" style="animation-delay: 2s;"></div>
+    </div>
+
+    <div class="pt-6 pb-6 border-b border-gray-100 dark:border-slate-800 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl">
+        <div class="container mx-auto px-4 max-w-7xl">
+            <div class="flex justify-between items-center mb-6 w-full gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="relative shrink-0">
+                        <h1 class="text-4xl md:text-6xl font-[800] font-sans tracking-tighter italic text-slate-900 dark:text-white leading-none">Muiii</h1>
+                    </div>
+                    <div class="h-10 w-px bg-gray-200 dark:bg-slate-700 hidden md:block"></div>
+                    <div class="flex flex-col justify-center">
+                        <span class="text-lg md:text-2xl font-bold tracking-tight text-slate-800 dark:text-slate-100 uppercase leading-none">搶票戰績</span>
+                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 tracking-[0.4em] uppercase mt-1.5 hidden md:block">Premium Tracker System</span>
+                    </div>
+                </div>
+                <div class="flex gap-2 shrink-0">
+                    <button id="theme-toggle" class="sys-btn" title="切換顯示模式">
+                        <i class="fas fa-moon"></i><span>深色模式</span>
+                    </button>
+                    <button id="layout-toggle" class="sys-btn" title="切換版面佈局">
+                        <i class="fas fa-th-large"></i><span>列表佈局</span>
+                    </button>
+                    <button id="reload-btn" class="sys-btn">
+                        <i class="fas fa-sync-alt"></i><span>重整資料</span>
+                    </button>
+                </div>
             </div>
-
-            <div class="bg-slate-50 rounded-xl p-3 text-xs space-y-1.5 font-medium text-slate-600 mb-2">
-              <div class="flex justify-between"><span class="text-slate-400">張數：</span><span class="font-bold text-slate-800">${ev.ticketCount}</span></div>
-              <div class="flex justify-between items-center"><span class="text-slate-400">帳號：</span><span class="font-mono font-bold text-slate-800">${ev.account} <i onclick="copyText('${ev.account}')" class="fas fa-copy ml-1 cursor-pointer text-slate-400 hover:text-emerald-600"></i></span></div>
-              <div class="flex justify-between items-center"><span class="text-slate-400">密碼：</span><span class="font-mono font-bold text-slate-800">${ev.password} <i onclick="copyText('${ev.password}')" class="fas fa-copy ml-1 cursor-pointer text-slate-400 hover:text-emerald-600"></i></span></div>
-              <div class="flex justify-between"><span class="text-slate-400">區域：</span><span class="font-bold text-slate-800">${ev.ticketArea}</span></div>
-              <div class="flex justify-between"><span class="text-slate-400">演出日期：</span><span class="font-bold text-slate-800">${ev.eventDate}</span></div>
-              ${ev.ticketLink ? `<div class="pt-1"><a href="${ev.ticketLink}" target="_blank" class="text-emerald-600 hover:underline flex items-center gap-1 font-bold"><i class="fas fa-link"></i> 前往售票網址</a></div>` : ''}
+            
+            <div class="flex flex-col lg:flex-row items-center bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-2 gap-2 shadow-sm transition-all focus-within:shadow-emerald-100 dark:focus-within:shadow-emerald-900/20">
+                <div class="flex items-center flex-grow w-full px-3 h-[44px]">
+                    <i class="fas fa-search text-slate-400 mr-3 text-sm"></i>
+                    <input type="text" id="searchInput" placeholder="搜尋歌手、場館名稱、售票日期..." class="w-full bg-transparent text-slate-800 dark:text-white py-2 focus:outline-none placeholder-slate-300 dark:placeholder-slate-600 font-bold text-base">
+                </div>
+                <div class="flex flex-wrap lg:flex-nowrap items-center gap-2 w-full lg:w-auto shrink-0 border-t border-gray-50 dark:border-slate-700 lg:border-t-0 pt-2 lg:pt-0 lg:pl-2">
+                    <select id="platform-filter" class="cyber-select font-bold text-slate-500 flex-1 min-w-[130px] lg:flex-none"><option value="all">所有平台</option></select>
+                    <select id="year-filter" class="cyber-select font-bold text-slate-500 flex-1 min-w-[90px] lg:flex-none"><option value="all">年份</option></select>
+                    <select id="month-filter" class="cyber-select font-bold text-slate-500 flex-1 min-w-[90px] lg:flex-none" disabled>
+                        <option value="all">月份</option>
+                    </select>
+                    <select id="sortSelect" class="cyber-select font-bold text-emerald-600 flex-1 min-w-[100px] lg:flex-none"><option value="desc">新到舊</option><option value="asc">舊到新</option></select>
+                    <button id="reset-btn" class="h-[44px] bg-slate-900 dark:bg-slate-700 hover:bg-black dark:hover:bg-slate-600 text-white px-5 rounded-xl flex items-center justify-center gap-2 transition text-xs font-black shrink-0 shadow-sm w-full lg:w-auto whitespace-nowrap"><i class="fas fa-undo text-[10px]"></i><span>重置</span></button>
+                </div>
             </div>
-
-            ${actionButtonsHtml}
-          </div>
-        `;
-      }).join('');
-    }
-
-    async function fetchSheetRecords() {
-      document.getElementById('loadingRecords').style.display = 'block';
-      document.getElementById('recordsCardList').innerHTML = '';
-      try {
-        const resp = await fetch(`${GAS_WEB_APP_URL}?action=get_all_records`);
-        const data = await resp.json();
-        sheetRecords = data.records || [];
-        renderRecordsList();
-      } catch (err) {
-        document.getElementById('recordsCardList').innerHTML = '<p class="text-center col-span-3 text-xs text-red-500 font-bold">戰績載入失敗</p>';
-      } finally {
-        document.getElementById('loadingRecords').style.display = 'none';
-      }
-    }
-
-    function renderRecordsList() {
-      const container = document.getElementById('recordsCardList');
-      const search = document.getElementById('recordSearchInput').value.trim().toLowerCase();
-      const sort = document.getElementById('recordSortSelect').value;
-
-      let filtered = sheetRecords.filter(rec => {
-        const full = `${rec.title} ${rec.platform} ${rec.saleDate} ${rec.countTag}`.toLowerCase();
-        return !search || full.includes(search);
-      });
-
-      if (sort === 'asc') filtered.reverse();
-
-      if (filtered.length === 0) {
-        container.innerHTML = '<div class="col-span-full py-16 text-center text-slate-400 font-bold text-xs">沒有找到任何戰績</div>';
-        return;
-      }
-
-      container.innerHTML = filtered.map(rec => `
-        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm flex flex-col justify-between">
-          <div>
-            ${rec.imageUrl ? `<div class="h-44 bg-slate-100 overflow-hidden"><img src="${rec.imageUrl}" class="w-full h-full object-cover"></div>` : `<div class="h-28 bg-slate-50 flex items-center justify-center text-slate-300 font-bold text-xs">無戰報截圖</div>`}
-            <div class="p-4">
-              <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md inline-block mb-1.5">${rec.platform}</span>
-              <h4 class="font-extrabold text-sm text-slate-900 leading-snug line-clamp-2">${rec.title}</h4>
-              <p class="text-xs text-slate-400 font-bold mt-2">售票：${rec.saleDate}</p>
-              <p class="text-xs text-slate-600 font-bold mt-0.5">規格：${rec.countTag}</p>
-            </div>
-          </div>
-          <div class="p-4 pt-0 flex gap-2">
-            <button onclick='openEditRecordModal(${JSON.stringify(rec)})' class="flex-1 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50">編輯</button>
-            <button onclick="deleteRecord(${rec.rowIndex})" class="px-3 py-1.5 rounded-xl border border-red-200 text-xs font-bold text-red-600 hover:bg-red-50">刪除</button>
-          </div>
         </div>
-      `).join('');
-    }
+    </div>
 
-    function openPublishModal(ev) {
-      document.getElementById('modalEventId').value = ev.id;
-      document.getElementById('modalSaleDate').value = ev.ticketDate || '';
-      document.getElementById('modalTitle').value = ev.name || '';
-      document.getElementById('modalPlatform').value = '';
-      document.getElementById('modalCountTag').value = ev.ticketCount ? `${ev.ticketCount}張` : '';
-      clearImage({ stopPropagation: () => {} }, 'modal');
-      document.getElementById('publishModal').classList.add('active');
-    }
+    <div class="container mx-auto px-4 py-10 max-w-7xl flex-grow">
+        <div id="skeleton-container" class="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-24">
+            <div class="ticket-card rounded-2xl flex flex-col h-[180px] overflow-hidden">
+                <div class="flex items-stretch gap-0 h-[110px]">
+                    <div class="skeleton-block w-[95px] h-full"></div>
+                    <div class="p-6 flex-1 flex flex-col justify-center gap-2.5">
+                        <div class="skeleton-block h-5 w-3/4 rounded-md"></div>
+                        <div class="skeleton-block h-3.5 w-1/4 rounded-md"></div>
+                    </div>
+                </div>
+                <div class="ticket-dashed-line mx-8"></div>
+                <div class="p-4 flex gap-2"><div class="skeleton-block h-7 w-20 rounded-lg"></div></div>
+            </div>
+            <div class="ticket-card rounded-2xl flex flex-col h-[180px] overflow-hidden">
+                <div class="flex items-stretch gap-0 h-[110px]">
+                    <div class="skeleton-block w-[95px] h-full"></div>
+                    <div class="p-6 flex-1 flex flex-col justify-center gap-2.5">
+                        <div class="skeleton-block h-5 w-2/3 rounded-md"></div>
+                        <div class="skeleton-block h-3.5 w-1/3 rounded-md"></div>
+                    </div>
+                </div>
+                <div class="ticket-dashed-line mx-8"></div>
+                <div class="p-4 flex gap-2"><div class="skeleton-block h-7 w-20 rounded-lg"></div></div>
+            </div>
+            <div class="ticket-card rounded-2xl flex flex-col h-[180px] overflow-hidden hidden md:flex">
+                <div class="flex items-stretch gap-0 h-[110px]">
+                    <div class="skeleton-block w-[95px] h-full"></div>
+                    <div class="p-6 flex-1 flex flex-col justify-center gap-2.5">
+                        <div class="skeleton-block h-5 w-4/5 rounded-md"></div>
+                        <div class="skeleton-block h-3.5 w-1/4 rounded-md"></div>
+                    </div>
+                </div>
+                <div class="ticket-dashed-line mx-8"></div>
+                <div class="p-4 flex gap-2"><div class="skeleton-block h-7 w-20 rounded-lg"></div></div>
+            </div>
+            <div class="ticket-card rounded-2xl flex flex-col h-[180px] overflow-hidden hidden md:flex">
+                <div class="flex items-stretch gap-0 h-[110px]">
+                    <div class="skeleton-block w-[95px] h-full"></div>
+                    <div class="p-6 flex-1 flex flex-col justify-center gap-2.5">
+                        <div class="skeleton-block h-5 w-3/5 rounded-md"></div>
+                        <div class="skeleton-block h-3.5 w-1/4 rounded-md"></div>
+                    </div>
+                </div>
+                <div class="ticket-dashed-line mx-8"></div>
+                <div class="p-4 flex gap-2"><div class="skeleton-block h-7 w-20 rounded-lg"></div></div>
+            </div>
+        </div>
 
-    function closePublishModal() {
-      document.getElementById('publishModal').classList.remove('active');
-    }
+        <div id="record-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6 hidden pb-24"></div>
+        <div id="no-results" class="hidden text-center py-32">
+            <div class="bg-gray-100 dark:bg-slate-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"><i class="fas fa-search text-gray-200 dark:text-slate-600 text-3xl"></i></div>
+            <p class="text-gray-400 dark:text-slate-500 font-bold text-lg">找不到符合的紀錄</p>
+        </div>
+    </div>
 
-    async function confirmPublishRecord() {
-      const eventId = document.getElementById('modalEventId').value;
-      const title = document.getElementById('modalTitle').value.trim();
-      if (!title) return alert("請填寫節目名稱！");
+    <footer class="mt-auto text-center py-12 border-t border-gray-100 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80"><p class="text-gray-400 dark:text-slate-500 text-[10px] font-bold tracking-[0.5em] uppercase">&copy; 2026 MUIII PROJECT • TRACKING SYSTEM</p></footer>
 
-      const btn = document.getElementById('btnPublishConfirm');
-      btn.disabled = true;
-      btn.innerText = "發布中...";
+    <a href="https://liff.line.me/2010930705-qUp1Ao2b" target="_blank" rel="noopener noreferrer" class="line-float-btn" title="聯繫官方 LINE 預約搶票">
+        <i class="fab fa-line text-xl"></i>
+        <span>預約搶票</span>
+    </a>
 
-      try {
-        await fetch(GAS_WEB_APP_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            action: "publish_and_mark_success",
-            eventId: eventId,
-            saleDate: document.getElementById('modalSaleDate').value.trim(),
-            title: title,
-            platform: document.getElementById('modalPlatform').value.trim(),
-            countTag: document.getElementById('modalCountTag').value.trim(),
-            imageUrl: document.getElementById('modalImage').value.trim(),
-            imageBase64: modalBase64
-          })
-        });
+    <div id="proofModal" class="proof-modal" onclick="closeProofModal(event)">
+        <div class="relative max-w-2xl w-full bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 p-2 sm:p-4" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between pb-3 px-2 border-b border-slate-100 dark:border-slate-800">
+                <h4 id="proofModalTitle" class="text-base font-bold text-slate-800 dark:text-white truncate">戰報截圖</h4>
+                <button onclick="closeProofModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="mt-3 flex items-center justify-center max-h-[75vh] overflow-auto rounded-xl bg-slate-50 dark:bg-slate-950">
+                <img id="proofModalImg" src="" alt="戰報截圖" class="max-h-[70vh] w-auto object-contain rounded-lg shadow-sm">
+            </div>
+        </div>
+    </div>
 
-        alert("發布成功並標記為搶票成功！");
-        closePublishModal();
-        fetchAdminEvents();
-      } catch (e) {
-        alert("發布失敗：" + e.message);
-      } finally {
-        btn.disabled = false;
-        btn.innerText = "發布並標記成功";
-      }
-    }
+    <button id="back-to-top" class="fixed bottom-24 right-6 bg-slate-900 text-white w-10 h-10 rounded-full hidden items-center justify-center shadow-xl transition hover:scale-110 hover:bg-emerald-600 z-[900]"><i class="fas fa-arrow-up text-xs"></i></button>
 
-    function openEditRecordModal(rec) {
-      document.getElementById('editRowIndex').value = rec.rowIndex;
-      document.getElementById('editRowDisplay').innerText = rec.rowIndex;
-      document.getElementById('editRecordSaleDate').value = rec.saleDate || '';
-      document.getElementById('editRecordTitle').value = rec.title || '';
-      document.getElementById('editRecordPlatform').value = rec.platform || '';
-      document.getElementById('editRecordCountTag').value = rec.countTag || '';
-      document.getElementById('editRecordImage').value = rec.imageUrl || '';
-      clearImage({ stopPropagation: () => {} }, 'edit');
-      document.getElementById('editRecordModal').classList.add('active');
-    }
+    <script>
+        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vThZZurHBpfes9J-dLaoi51jpb0MnQ4oABmBux77r-OO5LOvuoex6lesE4GvZb-UQ5zgiqWEfiHxNQy/pub?output=csv';
+        const proxyUrl = 'https://api.allorigins.win/raw?url=';
+        let allRecords = [], currentYear = 'all', currentMonth = 'all', currentPlatform = 'all';
+        let KEY_DATE = '售票日期', KEY_TITLE = '節目名稱', KEY_COUNT = '張數', KEY_PLATFORM = '售票平台', KEY_IMAGE = '圖片';
+        let isGridView = true;
+        let debounceTimer = null;
 
-    function closeEditRecordModal() {
-      document.getElementById('editRecordModal').classList.remove('active');
-    }
+        function init() { 
+            fetchRecords(); 
+            setupEventListeners();
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                toggleTheme(true);
+            }
+        }
 
-    async function confirmUpdateRecord() {
-      const rowIndex = document.getElementById('editRowIndex').value;
-      const title = document.getElementById('editRecordTitle').value.trim();
-      if (!title) return alert("請填寫節目名稱！");
+        async function fetchRecords() {
+            document.getElementById('skeleton-container').classList.remove('hidden');
+            document.getElementById('record-grid').classList.add('hidden');
+            document.getElementById('no-results').classList.add('hidden');
 
-      const btn = document.getElementById('btnEditRecordConfirm');
-      btn.disabled = true;
-      btn.innerText = "儲存中...";
+            try {
+                let csvText = '';
+                try {
+                    const targetUrl = window.location.protocol === 'file:' 
+                        ? proxyUrl + encodeURIComponent(csvUrl) 
+                        : csvUrl;
+                    const response = await fetch(targetUrl);
+                    if (!response.ok) throw new Error('連線回應異常');
+                    csvText = await response.text();
+                } catch (e) {
+                    const fallbackRes = await fetch(proxyUrl + encodeURIComponent(csvUrl));
+                    if (!fallbackRes.ok) throw new Error('備用伺服器連線失敗');
+                    csvText = await fallbackRes.text();
+                }
 
-      try {
-        await fetch(GAS_WEB_APP_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            action: "update_record",
-            rowIndex: rowIndex,
-            saleDate: document.getElementById('editRecordSaleDate').value.trim(),
-            title: title,
-            platform: document.getElementById('editRecordPlatform').value.trim(),
-            countTag: document.getElementById('editRecordCountTag').value.trim(),
-            imageUrl: document.getElementById('editRecordImage').value.trim(),
-            imageBase64: editBase64
-          })
-        });
+                Papa.parse(csvText, {
+                    header: true,
+                    skipEmptyLines: true,
+                    transformHeader: h => h.trim().replace(/^\uFEFF/, ''),
+                    complete: function(results) {
+                        if (results.data && results.data.length > 0) { 
+                            const keys = Object.keys(results.data[0]); 
+                            KEY_DATE = keys.find(k => k === '售票日期' || (k.includes('日期') && !k.includes('演出'))) || KEY_DATE; 
+                            KEY_TITLE = keys.find(k => k.includes('節目') || k.includes('名稱') || k.includes('活動')) || KEY_TITLE; 
+                            KEY_COUNT = keys.find(k => k.includes('張數') || k.includes('數量')) || KEY_COUNT;
+                            KEY_PLATFORM = keys.find(k => k.includes('平台') || k === '售票平台' || k.includes('網站')) || KEY_PLATFORM;
+                            KEY_IMAGE = keys.find(k => k.includes('圖片') || k.includes('截圖') || k.includes('戰報') || k.toLowerCase().includes('proof') || k.toLowerCase().includes('image')) || '圖片';
+                        }
+                        allRecords = results.data.filter(item => item[KEY_TITLE] && item[KEY_TITLE].trim() !== '');
+                        populateYears(); 
+                        populatePlatforms();
+                        updateDashboard();
+                    }
+                });
+            } catch (err) {
+                console.error("載入失敗：", err);
+                document.getElementById('skeleton-container').classList.add('hidden');
+                document.getElementById('no-results').classList.remove('hidden');
+            }
+        }
 
-        alert("更新成功！");
-        closeEditRecordModal();
-        fetchSheetRecords();
-      } catch (e) {
-        alert("更新失敗：" + e.message);
-      } finally {
-        btn.disabled = false;
-        btn.innerText = "儲存變更";
-      }
-    }
+        function toggleTheme(forceDark) {
+            const html = document.documentElement;
+            const btn = document.getElementById('theme-toggle');
+            const span = btn.querySelector('span');
+            const icon = btn.querySelector('i');
+            
+            if (forceDark || !html.classList.contains('dark')) {
+                html.classList.add('dark');
+                icon.className = 'fas fa-sun';
+                span.textContent = '淺色模式';
+            } else {
+                html.classList.remove('dark');
+                icon.className = 'fas fa-moon';
+                span.textContent = '深色模式';
+            }
+        }
 
-    async function deleteRecord(rowIndex) {
-      if (!confirm(`確定要刪除第 ${rowIndex} 列這筆戰績嗎？`)) return;
-      try {
-        await fetch(GAS_WEB_APP_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "delete_record", rowIndex: rowIndex })
-        });
-        fetchSheetRecords();
-      } catch (e) {
-        alert("刪除失敗：" + e.message);
-      }
-    }
+        function toggleLayout() {
+            isGridView = !isGridView;
+            const btn = document.getElementById('layout-toggle');
+            const span = btn.querySelector('span');
+            const icon = btn.querySelector('i');
+            
+            if (isGridView) {
+                icon.className = 'fas fa-th-large';
+                span.textContent = '列表佈局';
+            } else {
+                icon.className = 'fas fa-list';
+                span.textContent = '網格佈局';
+            }
+            updateDashboard();
+        }
 
-    async function submitNewRecord() {
-      const title = document.getElementById('recTitle').value.trim();
-      if (!title) return alert("請填寫節目名稱！");
+        function setupEventListeners() {
+            document.getElementById('theme-toggle').onclick = () => toggleTheme();
+            document.getElementById('layout-toggle').onclick = toggleLayout;
 
-      const btn = document.getElementById('btnSubmitRec');
-      btn.disabled = true;
-      btn.innerText = "寫入試算表中...";
+            document.getElementById('searchInput').addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(updateDashboard, 200);
+            });
 
-      try {
-        await fetch(GAS_WEB_APP_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            action: "add_record",
-            saleDate: document.getElementById('recDate').value.trim(),
-            title: title,
-            platform: document.getElementById('recPlatform').value.trim(),
-            countTag: document.getElementById('recCount').value.trim(),
-            imageUrl: document.getElementById('recImage').value.trim(),
-            imageBase64: recBase64
-          })
-        });
+            document.getElementById('sortSelect').addEventListener('change', updateDashboard);
+            
+            const yearFilter = document.getElementById('year-filter'), 
+                  monthFilter = document.getElementById('month-filter'),
+                  platformFilter = document.getElementById('platform-filter');
 
-        alert("已成功插入至試算表最上方！");
-        document.getElementById('recTitle').value = '';
-        document.getElementById('recCount').value = '';
-        document.getElementById('recImage').value = '';
-        clearImage({ stopPropagation: () => {} }, 'rec');
-        location.hash = '#records';
-        fetchSheetRecords();
-      } catch (e) {
-        alert("寫入失敗：" + e.message);
-      } finally {
-        btn.disabled = false;
-        btn.innerText = "➕ 新增戰績至試算表";
-      }
-    }
+            yearFilter.addEventListener('change', (e) => { 
+                currentYear = e.target.value; 
+                populateMonthsForYear(currentYear);
+                updateDashboard(); 
+            });
 
-    async function updateEventStatus(eventId, status) {
-      const promptText = status ? `確定要將此行程標記為【${status}】嗎？` : "確定要重設為【待處理】狀態嗎？";
-      if (!confirm(promptText)) return;
+            monthFilter.addEventListener('change', (e) => { 
+                currentMonth = e.target.value; 
+                updateDashboard(); 
+            });
 
-      try {
-        await fetch(GAS_WEB_APP_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "update_status", eventId: eventId, status: status })
-        });
-        alert("更新指令已送出！");
-        fetchAdminEvents();
-      } catch (e) {
-        alert("更新失敗：" + e.message);
-      }
-    }
+            platformFilter.addEventListener('change', (e) => { 
+                currentPlatform = e.target.value; 
+                updateDashboard(); 
+            });
 
-    function copyText(text) {
-      navigator.clipboard.writeText(text).then(() => {
-        alert("已複製到剪貼簿！");
-      });
-    }
-  </script>
+            document.getElementById('reset-btn').onclick = () => { 
+                document.getElementById('searchInput').value = ''; 
+                document.getElementById('sortSelect').value = 'desc'; 
+                yearFilter.value = 'all'; 
+                monthFilter.value = 'all'; 
+                platformFilter.value = 'all'; 
+                monthFilter.disabled = true; 
+                monthFilter.innerHTML = '<option value="all">月份</option>';
+                currentYear = 'all'; 
+                currentMonth = 'all'; 
+                currentPlatform = 'all'; 
+                updateDashboard(); 
+            };
+
+            document.getElementById('reload-btn').onclick = fetchRecords;
+            window.onscroll = () => { document.getElementById('back-to-top').style.display = window.scrollY > 400 ? 'flex' : 'none'; };
+            document.getElementById('back-to-top').onclick = () => window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function parseParts(dStr) {
+            if (!dStr) return { y: '', m: '', d: '' };
+            const parts = dStr.replace(/[\/\-]/g, '.').split('.');
+            return {
+                y: parts[0] || '',
+                m: parts[1] ? String(parts[1]).padStart(2, '0') : '',
+                d: parts[2] ? String(parts[2]).padStart(2, '0') : ''
+            };
+        }
+
+        function populateYears() {
+            const years = [...new Set(allRecords.map(item => parseParts(item[KEY_DATE]).y))].filter(y => y && y.length === 4).sort().reverse();
+            document.getElementById('year-filter').innerHTML = '<option value="all">年份</option>' + years.map(y => `<option value="${y}">${y} 年</option>`).join('');
+        }
+
+        function populateMonthsForYear(selectedYear) {
+            const monthFilter = document.getElementById('month-filter');
+            if (selectedYear === 'all') {
+                monthFilter.disabled = true;
+                monthFilter.innerHTML = '<option value="all">月份</option>';
+                currentMonth = 'all';
+                return;
+            }
+
+            const availableMonths = [...new Set(
+                allRecords
+                    .filter(item => parseParts(item[KEY_DATE]).y === selectedYear)
+                    .map(item => parseParts(item[KEY_DATE]).m)
+            )].filter(m => m).sort();
+
+            monthFilter.disabled = false;
+            monthFilter.innerHTML = '<option value="all">全月份</option>' + 
+                availableMonths.map(m => `<option value="${m}">${parseInt(m, 10)}月</option>`).join('');
+            currentMonth = 'all';
+        }
+
+        function populatePlatforms() {
+            const platforms = [...new Set(allRecords.map(item => (item[KEY_PLATFORM] || '').trim()))].filter(p => p !== '' && !p.match(/^\d{4}[\.\-\/]/));
+            document.getElementById('platform-filter').innerHTML = '<option value="all">所有平台</option>' + platforms.map(p => `<option value="${p}">${p}</option>`).join('');
+        }
+
+        function getTicketStatusBadge(rawDate) {
+            if (!rawDate) return '';
+            const { y, m, d } = parseParts(rawDate);
+            if (!y || !m || !d) return '';
+
+            const recordTime = new Date(`${y}-${m}-${d}T00:00:00`).getTime();
+            if (isNaN(recordTime)) return '';
+
+            const now = new Date();
+            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+            const diffDays = Math.round((todayStart - recordTime) / (1000 * 60 * 60 * 24));
+
+            if (diffDays >= 0 && diffDays <= 7) {
+                return `<span class="bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 px-2.5 py-1 rounded-lg text-[11px] font-black flex items-center border border-red-200 dark:border-red-800 shadow-sm"><i class="fas fa-fire mr-1 text-red-500"></i>最新戰績</span>`;
+            } else if (diffDays > 7 && y === String(now.getFullYear()) && m === String(now.getMonth() + 1).padStart(2, '0')) {
+                return `<span class="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-lg text-[11px] font-black flex items-center border border-emerald-200 dark:border-emerald-800 shadow-sm"><i class="fas fa-sparkles mr-1 text-emerald-500"></i>本月戰果</span>`;
+            }
+            return '';
+        }
+
+        function openProofModal(imgUrl, title) {
+            document.getElementById('proofModalImg').src = decodeURIComponent(imgUrl);
+            document.getElementById('proofModalTitle').innerText = decodeURIComponent(title) || '戰報截圖';
+            document.getElementById('proofModal').classList.add('active');
+        }
+
+        function closeProofModal() {
+            document.getElementById('proofModal').classList.remove('active');
+            document.getElementById('proofModalImg').src = '';
+        }
+
+        function updateDashboard() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim(), 
+                  sortOrder = document.getElementById('sortSelect').value;
+
+            let filtered = allRecords.filter(item => { 
+                const rawDate = item[KEY_DATE] || '';
+                const { y, m } = parseParts(rawDate);
+                const platformVal = (item[KEY_PLATFORM] || '').trim();
+                const titleMatch = (item[KEY_TITLE] || '').toLowerCase().includes(searchTerm); 
+                const dateMatch = rawDate.includes(searchTerm); 
+                const yearMatch = currentYear === 'all' || y === currentYear; 
+                const monthMatch = currentMonth === 'all' || m === currentMonth; 
+                const platformMatch = currentPlatform === 'all' || platformVal === currentPlatform; 
+                return (titleMatch || dateMatch) && yearMatch && monthMatch && platformMatch; 
+            });
+
+            filtered.sort((a, b) => { 
+                const d1 = a[KEY_DATE] || '', d2 = b[KEY_DATE] || ''; 
+                return sortOrder === 'desc' ? d2.localeCompare(d1) : d1.localeCompare(d2); 
+            });
+
+            renderUI(filtered);
+        }
+
+        function renderUI(data) {
+            const grid = document.getElementById('record-grid'), 
+                  noResults = document.getElementById('no-results'),
+                  skeleton = document.getElementById('skeleton-container');
+            
+            skeleton.classList.add('hidden');
+            grid.innerHTML = ''; 
+            
+            if (isGridView) {
+                grid.classList.remove('lg:grid-cols-1');
+                grid.classList.add('lg:grid-cols-2');
+            } else {
+                grid.classList.remove('lg:grid-cols-2');
+                grid.classList.add('lg:grid-cols-1');
+            }
+
+            if (data.length === 0) { 
+                grid.classList.add('hidden'); 
+                noResults.classList.remove('hidden'); 
+            } else {
+                noResults.classList.add('hidden'); 
+                grid.classList.remove('hidden');
+
+                data.forEach((item, index) => {
+                    const card = document.createElement('div'); 
+                    card.className = `ticket-card rounded-2xl flex flex-col h-full animate-fade-in-up overflow-hidden`; 
+                    card.style.animationDelay = `${Math.min(index * 20, 300)}ms`;
+
+                    const { y, m, d } = parseParts(item[KEY_DATE]);
+                    const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]; 
+                    const mIdx = parseInt(m, 10) - 1;
+                    const mStr = (mIdx >= 0 && mIdx < 12) ? monthNames[mIdx] : '---';
+
+                    const statusBadge = getTicketStatusBadge(item[KEY_DATE]);
+
+                    const tags = (item[KEY_COUNT] || '').split(' ').filter(t => t.trim()).map(tag => 
+                        `<span class="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 px-3 py-1.5 rounded-lg text-[11px] font-black flex items-center border border-emerald-100 dark:border-emerald-800 shadow-sm"><i class="fas fa-ticket-alt mr-2 opacity-60"></i>${tag}</span>`
+                    ).join('');
+                    
+                    const platformTag = item[KEY_PLATFORM] ? `<span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-2 block">${item[KEY_PLATFORM]}</span>` : '';
+
+                    const imgUrl = (item[KEY_IMAGE] || '').trim();
+                    let proofBtn = '';
+                    if (imgUrl) {
+                        const safeUrl = encodeURIComponent(imgUrl);
+                        const safeTitle = encodeURIComponent(item[KEY_TITLE] || '');
+                        proofBtn = `
+                            <button onclick="openProofModal('${safeUrl}', '${safeTitle}')" class="ml-auto bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 text-slate-600 dark:text-slate-300 hover:text-emerald-600 px-2.5 py-1.5 rounded-lg text-[11px] font-bold flex items-center gap-1.5 border border-slate-200 dark:border-slate-700 transition">
+                                <i class="fas fa-camera text-xs text-emerald-500"></i>
+                                <span>查看截圖</span>
+                            </button>
+                        `;
+                    }
+
+                    card.innerHTML = `
+                        <div class="flex-1 flex flex-col">
+                            <div class="flex items-stretch gap-0 h-full">
+                                <div class="ticket-stub flex flex-col items-center justify-center p-5 min-w-[90px] md:min-w-[100px] text-center">
+                                    <span class="text-[10px] font-black tracking-widest text-emerald-500 uppercase">${mStr}</span>
+                                    <span class="text-3xl md:text-4xl font-black font-oswald text-slate-900 dark:text-white my-1">${d || '--'}</span>
+                                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 opacity-80">${y || '----'}</span>
+                                </div>
+                                <div class="p-5 md:p-6 flex-1 flex flex-col justify-center">
+                                    <h3 class="text-sm md:text-lg font-black text-slate-800 dark:text-slate-100 leading-snug line-clamp-3">${item[KEY_TITLE]}</h3>
+                                    ${platformTag}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ticket-dashed-line mx-8"></div>
+                        <div class="p-5 bg-gray-50/50 dark:bg-slate-900/30 flex flex-wrap items-center gap-2.5">
+                            ${statusBadge}
+                            ${tags}
+                            ${proofBtn}
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+        }
+        init();
+    </script>
 </body>
 </html>
